@@ -1,0 +1,56 @@
+<%- include("../admin/layouts/adminHeader.ejs") %>
+    <%- include("../admin/layouts/adminSidebar.ejs") %>
+        <%- include("../admin/layouts/adminNavbar.ejs") %>
+
+            <div class="container">
+                <table class="table" style="margin-top: 100px">
+                    <thead>
+                        <tr>
+                            <th style="color: white;">Name</th>
+                            <th style="color: white;">Phone</th>
+                            <th style="color: white;">Email</th>
+                            <th style="color: white;">Status</th>
+                            <th style="color: white;">Block</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% users.forEach(user=> { %>
+                            <tr>
+                                <td style="color: white;">
+                                    <%= user.name %>
+                                </td>
+                                <td style="color: white;">
+                                    <%= user.phone %>
+                                </td>
+                                <td style="color: white;">
+                                    <%= user.email %>
+                                </td>
+                                <td>
+                                    <% if(user.is_verified==0) { %>
+                                        <p class="text-danger">Not Verified</p>
+                                        <% } else { %>
+                                            <p class="text-success">Verified</p>
+                                            <% } %>
+                                </td>
+                                <td>
+                                    <% if(user.is_blocked==0) { %>
+                                        <a href="/admin/block-user?id=<%= user._id %>" class="btn btn-danger">Block</a>
+                                        <% } else { %>
+                                            <a href="/admin/unblock-user?id=<%= user._id %>"
+                                                class="btn btn-success">Unblock</a>
+                                            <% } %>
+                                </td>
+                            </tr>
+                            <% }) %>
+                    </tbody>
+                </table>
+                <br><br>
+                <div class="text-center">
+                    <% for (let i=1 ; i<=totalPages ; i++) { %>
+                        <a style="color: white; padding-left: 10px;" href="?page=<%= i %>"><%= i %></a>
+                    <% } %>
+                </div>
+            </div>
+
+
+            <%- include("../admin/layouts/adminFooter.ejs") %>

@@ -1,0 +1,46 @@
+<%- include("../admin/layouts/adminHeader.ejs") %>
+<%- include("../admin/layouts/adminSidebar.ejs") %>
+<%- include("../admin/layouts/adminNavbar.ejs") %>
+
+  <div class="container">
+    <table class="table" style="margin-top: 100px">
+        <thead>
+            <tr>
+                <th style="color: white;">Category Name</th>
+                <th style="color: white;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if(categories.length > 0) {  %>
+            <% categories.forEach(category => { %>
+                <tr>
+                    <td style="color: white;">
+                        <%= category.name %>
+                    </td>
+                    <td>
+                        <a href="/admin/edit-category?id=<%= category._id %>" class="btn btn-primary">Edit</a>
+                        <a href="/admin/delete-category?id=<%= category._id %>" class="btn btn-danger mx-3">Delete</a>
+                    </td>
+                    <td></td>
+                </tr>
+                <% }) %>
+                <% } else { %>
+                <p> No Categories Found </p>
+                <% } %>
+        </tbody>
+    </table>
+    <br><br>
+    <div class="text-center">
+        <% for (let i=1 ; i<=totalPages ; i++) { %>
+            <a style="color: white; padding-left: 10px;" href="?page=<%= i %>"><%= i %></a>
+        <% } %>
+    </div>
+    <div class="text-left mt-5">
+        <a href="/admin/add-category" class="btn btn-primary">Add Category</a>
+    </div>
+</div>
+
+
+  
+
+<%- include("../admin/layouts/adminFooter.ejs") %>

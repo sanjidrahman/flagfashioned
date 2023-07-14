@@ -1,0 +1,239 @@
+<%- include("../user/layouts/userheader.ejs") %>
+
+<style>
+    .qty-btn {
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.cart__discount {
+  margin-bottom: 20px;
+}
+
+.cart__discount h6 {
+  margin-bottom: 10px;
+}
+
+.cart__discount input[type="text"] {
+  width: 77%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.cart__discount button[type="submit"] {
+  background-color: black;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 0px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cart__discount button[type="submit"]:hover {
+  background-color: black;
+}
+
+.cart__discount button[type="submit"]:focus {
+  outline: none;
+}
+
+</style>
+    <!-- Breadcrumb Section Begin -->
+        <section class="breadcrumb-option">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="breadcrumb__text">
+                            <h4>Shopping Cart</h4>
+                            <div class="breadcrumb__links">
+                                <a href="./index.html">Home</a>
+                                <a href="./shop.html">Shop</a>
+                                <span>Shopping Cart</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Breadcrumb Section End -->
+        <div id="reloadDiv">
+            <section class="shopping-cart spad">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <% if ( cart && cart.products ) { %>
+                                <div class="shopping__cart__table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Quantity</th>
+                                                <th>Total</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% cart.products.forEach((cart)=> { %>
+                                                <tr class="cart-item">
+                                                    <td class="product__cart__item">
+                                                        <div class="product__cart__item__pic">
+                                                            <img src="/adminassets/productImages/<%= cart.productId.image[0] %>"
+                                                                alt="" style="height: 100px; width: 100px;">
+                                                        </div>
+                                                        <div class="product__cart__item__text">
+                                                            <h6>
+                                                                <%= cart.productId.name %>
+                                                            </h6>
+                                                            <h5>₹<%= cart.productId.price %>
+                                                            </h5>
+                                                        </div>
+                                                    </td>
+                                                    <td class="quantity__item">
+                                                        <div class="quantity">
+                                                            <div class="pro-qty-2">
+                                                                <button class="qty-btn" type="button" onclick="increaseQuantity('<%= cart._id %>' , '<%= cart.productId._id %>', -1 )">-</button>
+                                                                <input type="text"  value="<%= cart.quantity %>" readonly>
+                                                                <button type="button" class="qty-btn" onclick="increaseQuantity('<%= cart._id %>' , '<%= cart.productId._id %>', 1 )">+</button>
+                                                            </div>
+                                                        </div>
+                                                    </td>                                                    
+                                                    <td class="cart__price">₹ <%= cart.totalPrice %>
+                                                    </td>
+                                                    <td class="cart__close">
+                                                        <a href="#" onclick="removeFromCart('<%= cart._id %>')"><i
+                                                                class="fa fa-close"></i></a>
+                                                    </td>
+                                                </tr>
+                                                <% }) %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6 col-sm-6">
+                                        <div class="continue__btn">
+                                            <a href="#">Continue Shopping</a>
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="cart__discount">
+                                <h6>Discount codes</h6>
+                                <form action="#">
+                                    <input type="text" placeholder="Coupon code">
+                                    <button type="submit">Apply</button>
+                                </form>
+                            </div>
+                            <div class="cart__total">
+                                <h6>Cart total</h6>
+                                <ul>
+                                    <li>Subtotal <span>₹ <%= total %></span></li>
+                                    <li>Total <span>₹ <%= total %></span></li>
+                                </ul>
+                                <a href="/checkout" class="primary-btn">Proceed to checkout</a>
+                            </div>
+                        </div>
+                        <% } else { %>
+                            <h4 class="text-center" style="padding-left: 420px;">No products in cart</h4>
+                            <% } %>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+    <script>
+
+        function removeFromCart(productId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to delete!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/deleteProducts',
+                        data: {
+                            prid: productId
+                        },
+                        method: 'post',
+                        success: (response) => {
+                            if (response.success) {
+                                $('#reloadDiv').load('/cart #reloadDiv', () => {
+                                    Swal.fire({
+                                        title: 'Deleted!',
+                                        text: 'Your item has been deleted.',
+                                        icon: 'success',
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    });
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'Failed to delete item.',
+                                    icon: 'error',
+                                    showConfirmButton: false
+                                });
+                            }
+                        },
+                        error: (error) => {
+                            console.log(error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'An error occurred while deleting the item.',
+                                icon: 'error',
+                                showConfirmButton: false
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+function increaseQuantity(cartId , productId ,count) {
+        $.ajax({
+            url : '/changes',
+            method : 'post',
+            data : {
+                cartId : cartId,
+                productId ,
+                count:count
+            },
+            success : (response) => {
+                if(response.success) {
+                    $('#reloadDiv').load('/cart #reloadDiv')
+                }else{
+                    Swal.fire({
+                    title : "Error",
+                    icon : 'error',
+                    text : response.message,
+                    timer : 2000
+                })
+                }
+            },
+            error : (error) => {
+                
+                Swal.fire({
+                    title : "Error",
+                    icon : 'error',
+                    text : response.message,
+                    timer : 1500
+                })
+            }
+        })
+    }
+    </script>
+
+    <!-- Shopping Cart Section End -->
+
+    <%- include("../user/layouts/userfooter.ejs") %>

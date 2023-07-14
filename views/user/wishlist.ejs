@@ -1,0 +1,73 @@
+<%- include("../user/layouts/userheader.ejs") %>
+
+<section class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb__text">
+                    <h4>Wishlist</h4>
+                    <div class="breadcrumb__links">
+                        <a href="/">Home</a>
+                        <span>Wishlist</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12 mt-5">
+            <% if (wish && wish.products) { %>
+                <div class="shopping__cart__table">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% wish.products.forEach((item)=> { %>
+                                    <tr class="cart-item">
+                                        <td class="product__cart__item">
+                                            <div class="product__cart__item__pic">
+                                                <img src="/adminassets/productImages/<%= item.productId.image[0] %>"
+                                                    alt="" style="height: 100px; width: 100px;">
+                                            </div>
+                                            <div class="product__cart__item__text">
+                                                <h6>
+                                                    <%= item.productId.name %>
+                                                </h6>
+                                                <h5>₹<%= item.productId.price %>
+                                                </h5>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button class="primary-btn"  type="submit">add to cart</button>
+                                        </td>
+                                        <td class="cart__close">
+                                            <a href="#" onclick="removeFromCart('<%= item._id %>')"><i class="fa fa-close"></i></a>
+                                        </td>
+                                    </tr>
+                                 <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <% } else { %> 
+                <h4 class="text-center mb-5">No products in Wishlist</h4>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+</script>
+
+
+<%- include("../user/layouts/userfooter.ejs") %>

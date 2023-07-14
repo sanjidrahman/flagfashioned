@@ -1,0 +1,60 @@
+<%- include("../admin/layouts/adminHeader.ejs") %>
+    <%- include("../admin/layouts/adminSidebar.ejs") %>
+        <%- include("../admin/layouts/adminNavbar.ejs") %>
+
+            <div class="container" style="overflow: auto; height: 700px;">
+                <% if (products.length> 0) { %>
+                    <table class="table" style="margin-top: 100px">
+                        <thead>
+                            <tr>
+                                <th style="color: white;">Product Image</th>
+                                <th style="color: white;">Product Name</th>
+                                <th style="color: white;">Price</th>
+                                <th style="color: white;">Category</th>
+                                <th style="color: white;">Stock</th>
+                                <th style="color: white;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% products.forEach(product => { %>
+                                <tr>
+                                    <td><img src="/adminassets/productImages/<%= product.image[0] %>" alt="no image" /></td>
+                                    <td style="color: white;">
+                                        <%= product.name %>
+                                    </td>
+                                    <td style="color: white;">
+                                        <%= product.price %>
+                                    </td>
+                                    <td style="color: white;">
+                                        <%= product.category %>
+                                    </td>
+                                    <!-- <td style="color: white;">
+                                        <%= product.description %>
+                                    </td> -->
+                                    <td style="color: white;">
+                                        <%= product.stock %>
+                                    </td>
+                                    <td>
+                                        <a href="/admin/edit-product?id=<%= product._id %>" class="btn btn-primary">Edit</a>
+                                        <a href="/admin/delete-product?id=<%= product._id %>" class="btn btn-danger">Delete</a>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
+                    <br><br>
+                    <div class="text-center">
+                        <% for (let i=1 ; i<=totalPages ; i++) { %>
+                            <a style="color: white; padding-left: 10px;" href="?page=<%= i %>"><%= i %></a>
+                        <% } %>
+                    </div>
+                    <% } else { %>
+                        <h3 style="margin-top: 120px;">No Products Found</h3>
+                        <% } %>
+
+                        <div class="text-left mt-5">
+                            <a href="/admin/add-product" class="btn btn-primary">Add Product</a>
+                        </div>
+            </div>
+
+            <%- include("../admin/layouts/adminFooter.ejs") %>
