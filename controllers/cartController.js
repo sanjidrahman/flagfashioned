@@ -32,7 +32,7 @@ const addToCart = async (req, res, next) => {
         const userId = await User.findOne({ _id: req.session.user_id })
         const product = await Product.findOne({ _id: productId })
 
-        const cart = await Cart.findOne({ user: userId })
+        const cart = await Cart.findOne({ user: userId }) 
 
         if (cart) {
             const existProduct = cart.products.find((product) => product.productId.toString() === productId)
@@ -54,7 +54,7 @@ const addToCart = async (req, res, next) => {
                                 productId: req.body.productId,
                                 quantity: req.body.quantity,
                                 price: product.price,
-                                totalPrice: total
+                                totalPrice: total 
                             }
                         }
                     })

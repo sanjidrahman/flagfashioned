@@ -354,8 +354,6 @@ const loadOrderPlaced = async (req , res , next) => {
 
         const id = req.params.id
         const order = await Order.findOne({ _id : id }).populate('products.productId')
-      
-        console.log(order);
 
         res.render('order-placed' , { session : req.session.user_id , order : order })
         
@@ -368,9 +366,12 @@ const loadOrderPlaced = async (req , res , next) => {
 const loadOrderDetails = async (req , res , next) => {
     try {
 
+        const date = new Date().toLocaleDateString('en-US', { year: 'numeric' , month: 'short' , day: '2-digit' }).replace(/\//g,'-')
+        console.log(date);
+
         const orderId = req.params.id
         const orderData = await Order.findOne({ 'products._id' : orderId }).populate('products.productId')
-        res.render('view-order-details' , { session : req.session.user_id , order : orderData} )
+        res.render('view-order-details' , { session : req.session.user_id , order : orderData } )
         
     } catch (err) {
         next(err.message)

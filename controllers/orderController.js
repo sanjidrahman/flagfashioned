@@ -8,14 +8,10 @@ const cancelOrder = async (req , res , next) => {
     try {
 
         const reason = req.body.reason
-        console.log(reason);
         const id = req.body.crId
-        console.log(id);
+
         const orderData = await Order.findOne({ 'products._id' : id })
-        console.log(orderData);
-        console.log('----------');
         const product = orderData.products.find((product) => product._id.toString() === id )
-        console.log(product);
 
         const cancel = await Order.findOneAndUpdate({ user : req.session.user_id , 'products._id' : id } , { $set : {
             'products.$.status' : 'Cancelled' ,
@@ -27,8 +23,32 @@ const cancelOrder = async (req , res , next) => {
         }else{
             res.json({ success : false })
         }
+        
+    } catch (err) {
+        next(err.message)
+    }
+}
 
+const returnOrder = async (req , res , next) => {
+    try {
 
+        const reason = req.body.reason
+        const id = req.body.crId
+
+        const orderData = await Order.findOne({ 'products._id' : id })
+        const product = orderData.products.find((product) => product._id.toString() === id )
+
+        const curr_date = new Date()
+        const cancel = await Order.findOneAndUpdate({ user : req.session.user_id , 'products._id' : id } , { $set : {
+            'products.$.status' : 'Cancelled' ,
+            'products.$.cancelReason' : reason
+        }})
+
+        if(cancel) {
+            res.json({ success : true})
+        }else{
+            res.json({ success : false })
+        }
         
     } catch (err) {
         next(err.message)
@@ -37,5 +57,6 @@ const cancelOrder = async (req , res , next) => {
 
 
 module.exports = {
-    cancelOrder
+    cancelOrder,
+    returnOrder
 }

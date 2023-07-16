@@ -3,6 +3,12 @@ const User = require('../models/userModel')
 const Product = require('../models/productModel')
 const Cart = require('../models/cartModel')
 const Order = require('../models/orderModel')
+const Razorpay = require('razorpay');
+
+var instance = new Razorpay({
+  key_id: process.env.KEY_ID,
+  key_secret: process.env.KEY_SECRET,
+});
 
 const loadAddAddress = async (req, res, next) => {
     try {
@@ -139,7 +145,7 @@ const placeOrder = async (req , res , next) => {
         const total = req.body.total
         const payment = req.body.payment
         
-       let status = payment == 'cod' ? 'fulfilled' : 'pending'
+       let status = payment == 'cod' ? 'placed' : 'pending'
 
         userId = req.session.user_id
         const user = await User.findOne({ _id : userId })
@@ -147,11 +153,9 @@ const placeOrder = async (req , res , next) => {
 
         const cartProducts = cartData.products
 
-        const orderDate = new Date()
-        const delivery = new Date()
-        delivery.setDate(orderDate.getDate() + 10)
-        console.log(delivery);
-      
+        const orderDate = new Date(); 
+        const delivery = new Date(orderDate.getTime() + (10 * 24 * 60 * 60 * 1000)); // Add 10 days to the order date
+        const deliveryDate = delivery.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).replace(/\//g, '-');
 
         const order = new Order({
             user : userId,
@@ -162,17 +166,72 @@ const placeOrder = async (req , res , next) => {
             date : orderDate,
             payment : payment,
             products : cartProducts,
-            expectedDelivery : delivery
+            expectedDelivery : deliveryDate
         })
 
         const orderData = await order.save() 
         const orderid = orderData._id
 
-        if(orderData) {
+        if(orderData.status === 'fulfilled') {
             await Cart.deleteOne({ user : req.session.user_id})
-            res.redirect("/order-placed/"+orderid)
+           for(let i=0 ; i< cartProducts.length ; i++) {
+            const productId = cartProducts[i].productId
+            const count = cartProducts[i].quantity
+            await Product.findByIdAndUpdate({ _id : productId } , { $inc : { quantity : -count }})
+           }
+            
+           res.json({ success : true , params : orderid })
+        }else{
+
+            const orderId = orderData._id
+            const total = orderData.totalAmount
+
+            var options = {
+                amount: total * 100 ,
+                currency: 'INR',
+                receipt: '' + orderId,
+              };
+      
+            console.log(options);
+            instance.orders.create(options, function (err, order) {
+                
+                res.json({ order });
+                
+            });
         }
         
+    } catch (err) {
+        next(err.message)
+    }
+}
+
+
+const verifypayment = async (req, res , next) => {
+    try {
+        let userData = await User.findOne({ _id : req.session.user_id })
+
+        const details = (req.body);
+
+        const crypto = require("crypto");
+        let hmac = crypto.createHmac("sha256", process.env.KEY_SECRET)
+        hmac.update(details.payment.razorpay_order_id + '|' + details.payment.razorpay_payment_id)
+        hmac = hmac.digest('hex')
+        if (hmac == details.payment.razorpay_signature) {
+            await Order.findByIdAndUpdate({
+                _id: details.order.receipt
+            },
+                { $set: { paymentId: details.payment.razorpay_payment_id } })
+
+            const data = await Order.findByIdAndUpdate({ _id: details.order.receipt }, { $set: { status: "placed" } })
+            console.log(data);
+            await Cart.deleteOne({ user: userData._id })
+            res.json({ success: true , params : details.order.receipt })
+        } else {
+            await Order.deleteOne({ _id: details.order.receipt });
+            res.json({ success: false }); 
+
+        }
+
     } catch (err) {
         next(err.message)
     }
@@ -184,5 +243,6 @@ module.exports = {
     loadEditAddAddress,
     editAddress,
     deleteAddress,
-    placeOrder
+    placeOrder,
+    verifypayment
 }

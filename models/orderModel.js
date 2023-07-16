@@ -44,6 +44,10 @@ const orderSchema = new mongoose.Schema({
         required : true
     },
 
+    paymentId : {
+        type : String
+    },
+
     products: [{
         productId: {
             type: mongoose.Schema.Types.ObjectId,

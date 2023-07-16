@@ -55,12 +55,15 @@ user_route.get('/check-edit-address' , checkoutController.loadEditAddAddress)
 user_route.post('/check-edit-address' , checkoutController.editAddress)
 user_route.post('/checkout-delete' , checkoutController.deleteAddress)
 user_route.post('/checkout' , checkoutController.placeOrder)
+user_route.post('/verifypayment' , checkoutController.verifypayment)
 
 
 user_route.post('/cancel-order' , orderController.cancelOrder)
 
 
 user_route.post('/addToWish' , wishlistController.addWishlist)
+user_route.post('/wish-cart' , wishlistController.addToCart)
+user_route.post('/wish-delete' , wishlistController.deleteWishlist)
 
 
 
