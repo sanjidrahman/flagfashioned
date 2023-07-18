@@ -264,6 +264,7 @@ const loadProifle = async (req, res) => {
     try {
 
         const orders = await Order.find({ user: req.session.user_id }).populate('products.productId');
+        console.log(orders);
   
         const address = await Address.findOne({ user: req.session.user_id })
         const users = await User.findOne({ _id: req.session.user_id })
@@ -367,7 +368,6 @@ const loadOrderDetails = async (req , res , next) => {
     try {
 
         const date = new Date().toLocaleDateString('en-US', { year: 'numeric' , month: 'short' , day: '2-digit' }).replace(/\//g,'-')
-        console.log(date);
 
         const orderId = req.params.id
         const orderData = await Order.findOne({ 'products._id' : orderId }).populate('products.productId')

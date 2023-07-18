@@ -71,8 +71,7 @@ const orderSchema = new mongoose.Schema({
         },
 
         status : {
-            type : String,
-            default : 'On the way'
+            type : String
         },
 
         cancelReason : {

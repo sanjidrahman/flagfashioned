@@ -35,21 +35,25 @@
                 </div>
                 <div class="form-group">
                   <label class="mt-1">Stock</label>
-                  <input class="form-control" type="number" id="stock" name="stock" value="<%= product.stock %>" style="color: white;">
+                  <input class="form-control" type="number" id="stock" name="stock" value="<%= product.stock %>"
+                    style="color: white;">
                 </div>
                 <div class="mb-3">
                   <label for="image" class="form-label">Product Image</label>
                   <input type="file" class="form-control" id="image" name="image" style="color: white;" multiple>
-                  <% product.image.forEach((image , index ) => { %>
+                  <% product.image.forEach((image, index)=> { %>
                     <div class="image-container">
-                      <img class="mt-2" src="/adminassets/productImages/<%= image %>" alt="no image" style="height: 90px; width: 90px;">
-                      <a href="/admin/delete-image/<%= product._id %>/<%= image %>" class="btn btn-danger delete-image">Delete</a>
+                      <img class="mt-2" src="/adminassets/productImages/<%= image %>" id="croppedOut_<%= index %>"
+                        alt="no image" style="height: 90px; width: 90px;">
+                      <button class="btn btn-primary crop-image" data-index="<%= index %>">Crop</button>
+                      <button class="btn btn-danger delete-image" data-index="<%= index %>"
+                        data-product-id="<%= product._id %>" data-image="<%= image %>">Delete</button>
                     </div>
-                  <% }) %>                  
+                    <% }) %>
                 </div>
                 <input type="hidden" id="id" name="id" value="<%= product._id %>">
                 <div>
-                  <% if(typeof message !=='undefined') { %>
+                  <% if(typeof message !=='undefined' ) { %>
                     <p class="text-danger">
                       <%= message %>
                     </p>
@@ -62,5 +66,57 @@
           </div>
         </div>
       </div>
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.js"></script>
+
+      <script>
+
+
+        // const image = document.getElementById('cropImage')
+        // const cropper = new Cropper(image, {
+        //   aspectRatio: 0,
+        //   viewMode: 0,
+        // })
+
+        // document.getElementById('cropImageBtn').addEventListener('click', function () {
+        //   var croppedImage = cropper.getCroppedCanvas().toDataURL('image/png')
+
+        //   alert(croppedImage)
+
+        //   document.getElementById('croppedOut').src = C
+
+        // })
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+          const imageContainers = document.querySelectorAll('.image-container');
+          imageContainers.forEach(function (container) {
+            const image = container.querySelector('img');
+            const cropBtn = container.querySelector('.crop-image');
+
+            // Initialize Cropper.js
+            const cropper = new Cropper(image, {
+              aspectRatio: 0, // Set desired aspect ratio for cropping
+              viewMode: 0, // Set view mode to restrict the crop box to the container size
+            });
+
+            cropBtn.addEventListener('click', function () {
+              // Display the cropped image
+              const croppedImage = cropper.getCroppedCanvas();
+              const index = this.dataset.index;
+              const croppedOutImage = document.getElementById(`croppedOut_${index}`);
+              croppedOutImage.src = croppedImage.toDataURL();
+
+              // Perform necessary operations with the cropped image
+              // ...
+
+              // Clean up the Cropper.js instance
+              cropper.destroy();
+            });
+          });
+        });
+
+
+      </script>
 
       <%- include("../admin/layouts/adminFooter.ejs") %>

@@ -141,7 +141,6 @@ const placeOrder = async (req , res , next) => {
     try {
 
         const bodyaddress = req.body.selectedAddress
-        console.log(bodyaddress);
         const total = req.body.total
         const payment = req.body.payment
         
@@ -172,7 +171,7 @@ const placeOrder = async (req , res , next) => {
         const orderData = await order.save() 
         const orderid = orderData._id
 
-        if(orderData.status === 'fulfilled') {
+        if(orderData.status === 'placed') {
             await Cart.deleteOne({ user : req.session.user_id})
            for(let i=0 ; i< cartProducts.length ; i++) {
             const productId = cartProducts[i].productId
@@ -192,7 +191,6 @@ const placeOrder = async (req , res , next) => {
                 receipt: '' + orderId,
               };
       
-            console.log(options);
             instance.orders.create(options, function (err, order) {
                 
                 res.json({ order });
@@ -223,7 +221,6 @@ const verifypayment = async (req, res , next) => {
                 { $set: { paymentId: details.payment.razorpay_payment_id } })
 
             const data = await Order.findByIdAndUpdate({ _id: details.order.receipt }, { $set: { status: "placed" } })
-            console.log(data);
             await Cart.deleteOne({ user: userData._id })
             res.json({ success: true , params : details.order.receipt })
         } else {

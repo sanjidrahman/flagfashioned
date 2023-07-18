@@ -1,0 +1,32 @@
+<%- include("../admin/layouts/adminHeader.ejs") %>
+<%- include("../admin/layouts/adminSidebar.ejs") %>
+<%- include("../admin/layouts/adminNavbar.ejs") %>
+
+<div class="container mt-5">
+    <div class="row">
+      <% orders.forEach((order) => { %>
+        <div class="col-lg-4 mt-4">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Order ID: <%= order._id %></h5>
+              <p class="card-text">Username: <%= order.userName %></p>
+              <p class="card-text">Date: <%= order.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).replace(/\//g,'-') %></p>
+              <p class="card-text">Total Price: <%= order.totalAmount %></p>
+              <p class="card-text">Status: <%= order.status %></p>
+              <a href="/admin/order-detail?id=<%= order._id %>" class="btn btn-primary">View Details</a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+    <div class="text-center">
+        <% for (let i=1 ; i <= count ; i++) { %>
+            <a style="color: white; padding-left: 10px;" href="?page=<%= i %>"><%= i %></a>
+        <% } %>
+    </div>
+  </div>
+
+
+  
+
+<%- include("../admin/layouts/adminFooter.ejs") %>

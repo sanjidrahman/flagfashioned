@@ -157,8 +157,6 @@ const deleteImage = async (req , res) => {
 
         const id = req.params.id
         const image = req.params.image
-        console.log(id);
-        console.log(image);
 
         fs.unlink(path.join(__dirname , '../public/adminassets/productImages' , image) , () => {})
         const deleImg = await Product.updateOne({ _id : id } , {$pull : {image : image}})

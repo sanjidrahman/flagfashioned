@@ -3,6 +3,7 @@ const admin_route = express()
 const adminController = require('../controllers/adminController')
 const categoryController = require('../controllers/categoryController')
 const productController = require('../controllers/productController')
+const orderController = require('../controllers/orderController')
 const auth = require('../middleware/adminAuth')
 const upload = require('../middleware/multer')
 const nocache = require('nocache')
@@ -40,5 +41,8 @@ admin_route.post('/edit-product' , upload.upload.array('image' , 5) , productCon
 admin_route.get('/delete-image/:id/:image' , auth.isLogin , productController.deleteImage)
 
 
+admin_route.get('/order' , auth.isLogin , orderController.loadOrder)
+admin_route.get('/order-detail' , auth.isLogin , orderController.orderDetails)
+admin_route.post('/order-details' , orderController.update)
 
 module.exports = admin_route

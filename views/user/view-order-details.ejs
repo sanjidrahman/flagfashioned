@@ -20,200 +20,195 @@
 
     <div class="container">
         <div class="row">
-            <div class="col-lg-12 mt-5">
+            <div class="col-lg-12 mt-3">
                 <% if (order && order.products) { %>
-                    <div class="shopping__cart__table">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Quantity</th>
-                                        <th>Total</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% order.products.forEach((cart)=> { %>
-                                        <tr class="cart-item">
-                                            <td class="product__cart__item">
-                                                <div class="product__cart__item__pic">
-                                                    <img src="/adminassets/productImages/<%= cart.productId.image[0] %>"
-                                                        alt="" style="height: 100px; width: 100px;">
-                                                </div>
-                                                <div class="product__cart__item__text">
-                                                    <h6>
-                                                        <%= cart.productId.name %>
-                                                    </h6>
-                                                    <h5>₹<%= cart.productId.price %>
-                                                    </h5>
-                                                </div>
-                                            </td>
-                                            <td class="quantity__item ">
-                                                <div class="quantity">
-                                                    <div class="pro-qty-2">
-                                                        <input type="text" value="<%= cart.quantity %>" readonly>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="cart__price">₹ <%= cart.totalPrice %>
-                                            </td>
-                                            <% if ( cart.status==='Cancelled' ) { %>
-                                                <td>
-                                                    <h5>Cancelled</h5>
-                                                </td>
-                                                <% } else if ( order.date == order.expectedDelivery ) { %>
-                                                    <td>
-                                                        <button type="button" class="btn btn-primary"
-                                                            data-bs-toggle="modal1" data-bs-target="#returnModal">
-                                                            Return
-                                                        </button>
-                                                    </td>
-                                                    <% } else { %>
-                                                        <td>
-                                                            <button type="button" class="btn btn-danger"
-                                                                data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                                                Cancel
-                                                            </button>
-                                                        </td>
-                                                        <% } %>
-                                        </tr>
-                                        <% }) %>
-                                </tbody>
-                            </table>
-                        </div>
+                <div class="shopping__cart__table">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% order.products.forEach((cart) => { %>
+                                <tr class="cart-item">
+                                    <td class="product__cart__item">
+                                        <div class="product__cart__item__pic">
+                                            <img src="/adminassets/productImages/<%= cart.productId.image[0] %>"
+                                                alt="" style="height: 100px; width: 100px;">
+                                        </div>
+                                        <div class="product__cart__item__text">
+                                            <h6><%= cart.productId.name %></h6>
+                                            <h5>₹<%= cart.productId.price %></h5>
+                                        </div>
+                                    </td>
+                                    <td class="quantity__item">
+                                        <div class="quantity">
+                                            <div class="pro-qty-2">
+                                                <input type="text" value="<%= cart.quantity %>" readonly>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="cart__price">₹ <%= cart.totalPrice %></td>
+                                    <td>
+                                        <h6><%= cart.status %></h6>
+                                    </td>
+                                    <td>
+                                        <% if (cart.status === 'delivered') { %>
+                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                            data-bs-target="#returnModal<%= cart._id %>">
+                                            Return
+                                        </button>
+                                        <% } else if (cart.status === 'cancelled') { %>
+                                        <p></p>
+                                        <% } else { %>
+                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                            data-bs-target="#cancelModal<%= cart._id %>">
+                                            Cancel
+                                        </button>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
                     </div>
-                    <% } %>
+                </div>
+                <% } %>
             </div>
         </div>
     </div>
-
-
-
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Order ID</th>
-                            <th scope="col">User Name</th>
-                            <th scope="col">Address Details</th>
-                            <th scope="col">Payment</th>
-                            <th scope="col">Total Price</th>
-                            <th scope="col">Date</th>
-                            <th scope="col">Delivery by</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <%= order._id %>
-                            </td>
-                            <td>
-                                <%= order.userName %>
-                            </td>
-                            <td>
-                                <%= order.deliveryAddress %>
-                            </td>
-                            <td>
-                                <%= order.payment %>
-                            </td>
-                            <td>₹ <%= order.totalAmount %>
-                            </td>
-                            <td>
-                                <%= order.date.toLocaleDateString('en-US', { year: 'numeric' , month: 'short' ,
-                                    day: '2-digit' }).replace(/\//g,'-') %>
-                            </td>
-                            <td>
-                                <%= order.expectedDelivery.toLocaleDateString('en-US', { year: 'numeric' ,
-                                    month: 'short' , day: '2-digit' }).replace(/\//g,'-') %>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+    
+    
+    
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Order ID</th>
+                                <th scope="col">User Name</th>
+                                <th scope="col">Address Details</th>
+                                <th scope="col">Payment</th>
+                                <th scope="col">Total Price</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Delivery by</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <%= order._id %>
+                                </td>
+                                <td>
+                                    <%= order.userName %>
+                                </td>
+                                <td>
+                                    <%= order.deliveryAddress %>
+                                </td>
+                                <td>
+                                    <%= order.payment %>
+                                </td>
+                                <td>₹ <%= order.totalAmount %>
+                                </td>
+                                <td>
+                                    <%= order.date.toLocaleDateString('en-US', { year: 'numeric' , month: 'short' ,
+                                        day: '2-digit' }).replace(/\//g,'-') %>
+                                </td>
+                                <td>
+                                    <%= order.expectedDelivery.toLocaleDateString('en-US', { year: 'numeric' ,
+                                        month: 'short' , day: '2-digit' }).replace(/\//g,'-') %>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    
+    <% if (order && order.products) { %>
+    <% order.products.forEach((cart) => { %>
+    <!-- Cancel Modal -->
+    <div class="modal fade" id="cancelModal<%= cart._id %>" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <% if (order && order.products) { %>
-                    <% order.products.forEach((cart)=> { %>
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="exampleModalLabel">Reason for cancellation</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-check">
-                                <input type="radio" id="cancelReason" name="cancelReason" value="Change of Mind"
-                                    required>
-                                <label>Change of Mind</label>
+               <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Reason for cancellation</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="form-check">
-                                <input type="radio" id="cancelReason" name="cancelReason"
-                                    value="Shipping or Delivery Concerns" required>
-                                <label>Shipping or Delivery Concerns</label>
+                            <div class="modal-body">
+                                <div class="form-check">
+                                    <input type="radio" id="cancelReason" name="cancelReason" value="Change of Mind"
+                                        required>
+                                    <label>Change of Mind</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" id="cancelReason" name="cancelReason"
+                                        value="Shipping or Delivery Concerns" required>
+                                    <label>Shipping or Delivery Concerns</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" id="cancelReason" name="cancelReason" value="Payment Issues"
+                                        required>
+                                    <label>Payment Issues</label>
+                                </div>
                             </div>
-                            <div class="form-check">
-                                <input type="radio" id="cancelReason" name="cancelReason" value="Payment Issues"
-                                    required>
-                                <label>Payment Issues</label>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" onclick="cancelOrder('<%= cart._id %>')"
+                                    class="btn btn-danger">Cancel</button>
                             </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" onclick="cancelOrder('<%= cart._id %>')"
-                                class="btn btn-danger">Cancel</button>
-                        </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Return Modal -->
+    <div class="modal fade" id="returnModal<%= cart._id %>" tabindex="-1" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Reason for cancellation</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-check">
+                        <input type="radio" id="cancelReason" name="cancelReason" value="Change of Mind"
+                            required>
+                        <label>Change of Mind</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" id="cancelReason" name="cancelReason"
+                            value="Shipping or Delivery Concerns" required>
+                        <label>Shipping or Delivery Concerns</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" id="cancelReason" name="cancelReason" value="Payment Issues"
+                            required>
+                        <label>Payment Issues</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Close</button>
+                    <button type="button" onclick="cancelOrder('<%= cart._id %>')"
+                        class="btn btn-danger">Cancel</button>
+                </div>
             </div>
         </div>
     </div>
     <% }) %>
-        <% } %>
-            </div>
-
-            <% if (order && order.products) { %>
-                <% order.products.forEach((cart)=> { %>
-                    <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-                        aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Reason for cancellation</h1>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="form-check">
-                                        <input type="radio" id="cancelReason" name="cancelReason" value="Change of Mind"
-                                            required>
-                                        <label>Change of Mind</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="radio" id="cancelReason" name="cancelReason"
-                                            value="Shipping or Delivery Concerns" required>
-                                        <label>Shipping or Delivery Concerns</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="radio" id="cancelReason" name="cancelReason" value="Payment Issues"
-                                            required>
-                                        <label>Payment Issues</label>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary"
-                                        data-bs-dismiss="modal">Close</button>
-                                    <button type="button" onclick="cancelOrder('<%= cart._id %>')"
-                                        class="btn btn-danger">Cancel</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <% }) %>
-                        <% } %>
-                            </div>
+    <% } %>
+    
+    
 
 
                             <script>

@@ -132,7 +132,7 @@
                                         <div class="quantity">
                                             <div class="pro-qty">
                                                 <input type="number" value="1" name="quantity" id="quantity" min="1"
-                                                    step="1">
+                                                    step="1" max="<%= products[0].stock %>">
                                             </div>
                                         </div>
                                         <button class="primary-btn" onclick="addToCart()" type="submit">add to
