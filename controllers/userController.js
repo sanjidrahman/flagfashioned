@@ -171,6 +171,7 @@ const registerUser = async (req, res) => {
                 otp = generateOtp
 
                 sendVerifyMail(req.body.name, req.body.email, otp)
+                
                 res.render('otp-page', { isTimerExpired: false })
             } else {
                 res.render('register', { message: 'oops , something went wrong' })
@@ -264,7 +265,6 @@ const loadProifle = async (req, res) => {
     try {
 
         const orders = await Order.find({ user: req.session.user_id }).populate('products.productId');
-        console.log(orders);
   
         const address = await Address.findOne({ user: req.session.user_id })
         const users = await User.findOne({ _id: req.session.user_id })
@@ -371,6 +371,7 @@ const loadOrderDetails = async (req , res , next) => {
 
         const orderId = req.params.id
         const orderData = await Order.findOne({ 'products._id' : orderId }).populate('products.productId')
+        console.log(orderData);
         res.render('view-order-details' , { session : req.session.user_id , order : orderData } )
         
     } catch (err) {

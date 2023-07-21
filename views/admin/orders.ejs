@@ -2,29 +2,92 @@
 <%- include("../admin/layouts/adminSidebar.ejs") %>
 <%- include("../admin/layouts/adminNavbar.ejs") %>
 
-<div class="container mt-5">
-    <div class="row">
-      <% orders.forEach((order) => { %>
-        <div class="col-lg-4 mt-4">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Order ID: <%= order._id %></h5>
-              <p class="card-text">Username: <%= order.userName %></p>
-              <p class="card-text">Date: <%= order.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).replace(/\//g,'-') %></p>
-              <p class="card-text">Total Price: <%= order.totalAmount %></p>
-              <p class="card-text">Status: <%= order.status %></p>
-              <a href="/admin/order-detail?id=<%= order._id %>" class="btn btn-primary">View Details</a>
-            </div>
-          </div>
-        </div>
-      <% }) %>
-    </div>
-    <div class="text-center">
-        <% for (let i=1 ; i <= count ; i++) { %>
-            <a style="color: white; padding-left: 10px;" href="?page=<%= i %>"><%= i %></a>
-        <% } %>
-    </div>
+<style>
+  /* Add your custom CSS styles here */
+
+  /* Example styles for responsive layout */
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #181520;
+    color: #ffffff;
+  }
+
+  .container {
+    margin-top: 70px;
+  }
+
+  .table {
+    width: 100%;
+
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  th, td {
+    color: #ffffff;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #15141f;
+  }
+
+  th {
+    font-size: 20px;
+    font-weight: bold;
+
+  }
+
+  td {
+    font-size: 16px;
+  }
+
+  .text-center {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .pagination-link {
+    color: #ffffff;
+    padding-left: 10px;
+    text-decoration: none;
+  }
+
+  .pagination-link:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<div class="container mb-5">
+  <div class="text-center">
+    <% for (let i = 1; i <= totalPages; i++) { %>
+      <a class="pagination-link" href="?pages=<%= i %>"><%= i %></a>
+    <% } %>
   </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Username</th>
+        <th>Date</th>
+        <th>Total Price</th>
+        <th>Status</th>
+        <th>View Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% orders.forEach((order) => { %>
+        <tr>
+          <td><%= order._id %></td>
+          <td><%= order.userName %></td>
+          <td><%= order.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).replace(/\//g,'-') %></td>
+          <td>₹ <%= order.totalAmount %></td>
+          <td><%= order.status %></td>
+          <td><a href="/admin/order-detail?id=<%= order._id %>" class="btn btn-primary">View Details</a></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
 
 
   

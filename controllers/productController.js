@@ -6,27 +6,27 @@ const path = require('path')
 const loadProduct = async (req, res) => {
     try {
 
-        var page = 1 
-        if(req.query.page) {
+        var page = 1
+        if (req.query.page) {
             page = req.query.page
         }
 
         const limit = 7
 
         const product = await Product.find({
-            is_delete : 0
+            is_delete: 0
         })
-        .limit(limit * 1)
-        .skip((page - 1) * limit)
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
 
         const count = await Product.find({
-            is_delete : 0
+            is_delete: 0
         }).countDocuments()
 
-        res.render('product', { 
+        res.render('product', {
             products: product,
-            totalPages : Math.ceil(count / limit)
-         })
+            totalPages: Math.ceil(count / limit)
+        })
 
     } catch (err) {
         console.log(err.message);
@@ -55,30 +55,37 @@ const addProduct = async (req, res) => {
             }
         }
 
-
         const category = await Category.find({ is_delete: false })
-        const existProduct = await Product.findOne({ name: req.body.name })
-        if (existProduct) {
-            res.render('addProduct', { message: 'product exists', categories: category })
-        } else {
 
-            const product = new Product({
-                name: req.body.name,
-                price: req.body.price,
-                description: req.body.description,
-                image: images,
-                category: req.body.category,
-                stock : req.body.stock
-            })
-
-            const newProduct = product.save()
-
-            if (newProduct) {
-                res.redirect('/admin/product')
+        const price = req.body.price
+        const stock = req.body.stock
+        if (price && stock > 0) {
+            const existProduct = await Product.findOne({ name: req.body.name })
+            if (existProduct) {
+                res.render('addProduct', { message: 'product exists', categories: category })
             } else {
-                res.render('addProduct', { message: 'something went wrong' })
+
+                const product = new Product({
+                    name: req.body.name,
+                    price: price,
+                    description: req.body.description,
+                    image: images,
+                    category: req.body.category,
+                    stock: stock
+                })
+
+                const newProduct = product.save()
+
+                if (newProduct) {
+                    res.redirect('/admin/product')
+                } else {
+                    res.render('addProduct', { message: 'something went wrong' })
+                }
             }
+        } else {
+            res.render('addProduct', { message: 'cannot give a negative value', categories: category })
         }
+
 
     } catch (err) {
         console.log(err.message);
@@ -88,7 +95,7 @@ const addProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
     try {
 
-        await Product.findOneAndUpdate({ _id: req.query.id } , {$set : { is_delete : 1 }})
+        await Product.findOneAndUpdate({ _id: req.query.id }, { $set: { is_delete: 1 } })
         res.redirect('/admin/product')
 
     } catch (err) {
@@ -119,9 +126,8 @@ const editProduct = async (req, res) => {
             }
         }
 
-        
-        const imageUpdate = await Product.findByIdAndUpdate({ _id : req.body.id } , {$push : {image : {$each : images}}})
-        if(imageUpdate) {
+        const imageUpdate = await Product.findByIdAndUpdate({ _id: req.body.id }, { $push: { image: { $each: images } } })
+        if (imageUpdate) {
             res.redirect(`/admin/edit-product?id=${req.body.id}`)
         }
 
@@ -141,30 +147,30 @@ const editProduct = async (req, res) => {
             }
         })
 
-        // if (editedProduct) {
-        //     res.redirect('/admin/product')
-        // } else {
-        //     res.render('editProduct', { message: 'something went wrong !!' })
-        // }
+    // if (editedProduct) {
+    //     res.redirect('/admin/product')
+    // } else {
+    //     res.render('editProduct', { message: 'something went wrong !!' })
+    // }
 
-    } catch (err) {
-        console.log(err.message);
-    }
+} catch (err) {
+    console.log(err.message);
+}
 }
 
-const deleteImage = async (req , res) => {
+const deleteImage = async (req, res) => {
     try {
 
         const id = req.params.id
         const image = req.params.image
 
-        fs.unlink(path.join(__dirname , '../public/adminassets/productImages' , image) , () => {})
-        const deleImg = await Product.updateOne({ _id : id } , {$pull : {image : image}})
+        fs.unlink(path.join(__dirname, '../public/adminassets/productImages', image), () => { })
+        const deleImg = await Product.updateOne({ _id: id }, { $pull: { image: image } })
 
-        if(deleImg) {
+        if (deleImg) {
             res.redirect(`/admin/edit-product?id=${id}`)
         }
-        
+
     } catch (err) {
         console.log(err.message);
     }

@@ -1,0 +1,91 @@
+<%- include("../admin/layouts/adminHeader.ejs") %>
+<%- include("../admin/layouts/adminSidebar.ejs") %>
+<%- include("../admin/layouts/adminNavbar.ejs") %>
+
+<style>
+    /* Add your custom CSS styles here */
+
+    /* Example styles for responsive layout */
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .card {
+      background-color: #101116;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color:  #101116;
+    }
+    img {
+      max-width: 100px;
+      max-height: 100px;
+    }
+    .sort-container {
+      text-align: right;
+    }
+    .sort-container label {
+      font-weight: bold;
+    }
+  </style>
+
+<div class="container">
+    <% if (totalOrders && totalAmount && totalSold && product && totalOrders.length > 0 && totalAmount.length > 0 && totalSold.length > 0 && product.length > 0) { %>
+      <div class="card" style="margin-top: 70px;">
+        <h2>Total Orders: <%= totalOrders[0].total %></h2>
+        <h2>Total Amount Generated: <%= totalAmount[0].total %></h2>
+        <h2>Total Product Sold Quantity: <%= totalSold[0].total %></h2>
+      </div>
+      <div class="table-container">
+        <div class="sort-container mb-3">
+          <label for="from-date">From Date:</label>
+          <input type="date" id="from-date">
+          <label for="to-date">To Date:</label>
+          <input type="date" id="to-date">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Product Image</th>
+              <th>Product Name</th>
+              <th>Total Sold</th>
+              <th>Amount Generated</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% product.forEach((item) => { %>
+              <tr>
+                <td><img style="width: 50px; height: 50px;" src="/adminassets/productImages/<%= item.productImage %>" alt="<%= item.productName %>"></td>
+                <td><%= item.productName %></td>
+                <td><%= item.totalQuantitySold %></td>
+                <td>₹ <%= item.totalRevenueGenerated.toFixed(2) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <h2 style="margin-top: 100px;">No data available.</h2>
+    <% } %>
+  </div>
+  
+
+
+<%- include("../admin/layouts/adminFooter.ejs") %>

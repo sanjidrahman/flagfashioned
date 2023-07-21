@@ -44,5 +44,6 @@ admin_route.get('/delete-image/:id/:image' , auth.isLogin , productController.de
 admin_route.get('/order' , auth.isLogin , orderController.loadOrder)
 admin_route.get('/order-detail' , auth.isLogin , orderController.orderDetails)
 admin_route.post('/order-details' , orderController.update)
+admin_route.get('/sales-report' , auth.isLogin , orderController.salesReport)
 
 module.exports = admin_route

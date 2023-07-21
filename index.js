@@ -6,8 +6,9 @@ mongoose.connect(process.env.MONGODB)
 .catch((err)=> console.log(err.message))
 const session = require('express-session')
 const config = require('./config/config')
-const errorMiddleware = require('./middleware/errorMiddleware')
+const morgan = require('morgan')
 const nocache = require('nocache')
+const errorMiddleware = require('./middleware/errorMiddleware')
 
 
 const express = require('express');
@@ -24,6 +25,7 @@ app.use(session({
 }))
 app.use(express.static('public'));
 app.use(nocache())
+app.use(morgan('dev'))
 
 
 const userRoute = require('./routes/userRoute')

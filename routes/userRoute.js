@@ -16,7 +16,7 @@ user_route.set('views' , './views/user')
 user_route.use(nocache())
 
 user_route.get('/' ,   userController.loadHome)
-user_route.get('/shop' ,   userController.loadShop)
+user_route.get('/shop' ,  userController.loadShop)
 user_route.get('/login' , userController.loadLogin)
 user_route.post('/login' , userController.verifyLogin)
 user_route.get('/register' , userController.loadRegister)
@@ -44,7 +44,7 @@ user_route.post('/edit-address' , addressController.editAddress)
 
 
 user_route.get('/cart' , auth.isLogin , auth.isBlock , cartController.loadCart)
-user_route.post('/addToCart' , cartController.addToCart)
+user_route.post('/addToCart' , auth.isLogin , cartController.addToCart)
 user_route.post('/deleteProducts' ,cartController.deleteCart)
 user_route.post('/changes' , cartController.changes)
 
@@ -59,6 +59,7 @@ user_route.post('/verifypayment' , checkoutController.verifypayment)
 
 
 user_route.post('/cancel-order' , orderController.cancelOrder)
+user_route.post('/return-order' , orderController.returnOrder)
 
 
 user_route.post('/addToWish' , wishlistController.addWishlist)

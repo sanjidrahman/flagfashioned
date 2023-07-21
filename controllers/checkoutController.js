@@ -4,6 +4,7 @@ const Product = require('../models/productModel')
 const Cart = require('../models/cartModel')
 const Order = require('../models/orderModel')
 const Razorpay = require('razorpay');
+const { update } = require('./orderController')
 
 var instance = new Razorpay({
   key_id: process.env.KEY_ID,
@@ -153,7 +154,7 @@ const placeOrder = async (req , res , next) => {
         const cartProducts = cartData.products
 
         const orderDate = new Date(); 
-        const delivery = new Date(orderDate.getTime() + (10 * 24 * 60 * 60 * 1000)); // Add 10 days to the order date
+        const delivery = new Date(orderDate.getTime() + (10 * 24 * 60 * 60 * 1000));
         const deliveryDate = delivery.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).replace(/\//g, '-');
 
         const order = new Order({
@@ -172,12 +173,14 @@ const placeOrder = async (req , res , next) => {
         const orderid = orderData._id
 
         if(orderData.status === 'placed') {
-            await Cart.deleteOne({ user : req.session.user_id})
+           await Cart.deleteOne({ user : req.session.user_id})
+
            for(let i=0 ; i< cartProducts.length ; i++) {
             const productId = cartProducts[i].productId
             const count = cartProducts[i].quantity
-            await Product.findByIdAndUpdate({ _id : productId } , { $inc : { quantity : -count }})
+            await Product.findByIdAndUpdate({ _id : productId } , { $inc : { stock : -count }})
            }
+           
             
            res.json({ success : true , params : orderid })
         }else{

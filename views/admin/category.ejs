@@ -2,43 +2,43 @@
 <%- include("../admin/layouts/adminSidebar.ejs") %>
 <%- include("../admin/layouts/adminNavbar.ejs") %>
 
-  <div class="container">
-    <table class="table" style="margin-top: 100px">
+<div class="container">
+    <div class="text-left" style="margin-top: 100px;">
+        <a href="/admin/add-category" class="btn btn-primary">Add Category</a>
+    </div>
+    <table class="table" style="margin-top: 30px; color: white;">
         <thead>
             <tr>
-                <th style="color: white;">Category Name</th>
-                <th style="color: white;">Actions</th>
+                <th>Category Name</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            <% if(categories.length > 0) {  %>
+            <% if (categories.length > 0) { %>
             <% categories.forEach(category => { %>
-                <tr>
-                    <td style="color: white;">
-                        <%= category.name %>
-                    </td>
-                    <td>
-                        <a href="/admin/edit-category?id=<%= category._id %>" class="btn btn-primary">Edit</a>
-                        <a href="/admin/delete-category?id=<%= category._id %>" class="btn btn-danger mx-3">Delete</a>
-                    </td>
-                    <td></td>
-                </tr>
-                <% }) %>
-                <% } else { %>
-                <p> No Categories Found </p>
-                <% } %>
+            <tr>
+                <td><%= category.name %></td>
+                <td>
+                    <a href="/admin/edit-category?id=<%= category._id %>" class="btn btn-primary">Edit</a>
+                    <a href="/admin/delete-category?id=<%= category._id %>" class="btn btn-danger mx-3">Delete</a>
+                </td>
+            </tr>
+            <% }) %>
+            <% } else { %>
+            <tr>
+                <td colspan="2" class="text-center">No Categories Found</td>
+            </tr>
+            <% } %>
         </tbody>
     </table>
     <br><br>
     <div class="text-center">
-        <% for (let i=1 ; i<=totalPages ; i++) { %>
-            <a style="color: white; padding-left: 10px;" href="?page=<%= i %>"><%= i %></a>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+        <a href="?page=<%= i %>" style="color: white; padding: 5px 10px;"><%= i %></a>
         <% } %>
     </div>
-    <div class="text-left mt-5">
-        <a href="/admin/add-category" class="btn btn-primary">Add Category</a>
-    </div>
 </div>
+
 
 
   

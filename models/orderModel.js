@@ -71,10 +71,15 @@ const orderSchema = new mongoose.Schema({
         },
 
         status : {
-            type : String
+            type : String,
+            default : 'processing'
         },
 
         cancelReason : {
+            type : String
+        },
+
+        returnReason : {
             type : String
         }
 

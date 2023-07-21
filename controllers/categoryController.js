@@ -45,7 +45,7 @@ const addCategory = async (req , res) => {
     try {
 
         existCat = req.body.categoryName
-        const existingCategory = await Category.findOne({ name : existCat })
+        const existingCategory = await Category.findOne({ name : { $regex : `^${existCat}` , $options : 'i' }})
 
         if(existingCategory) {
             res.render('addCategory' , {message : 'category already exists'})

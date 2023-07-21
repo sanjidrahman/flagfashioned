@@ -17,7 +17,7 @@
         </div>
     </section>
 
-
+<div id="reloadDiv">
     <div class="container">
         <div class="row">
             <div class="col-lg-12 mt-3">
@@ -46,6 +46,7 @@
                                             <h6><%= cart.productId.name %></h6>
                                             <h5>₹<%= cart.productId.price %></h5>
                                         </div>
+                                        <input type="hidden" name="param" value="<%= cart._id %>">
                                     </td>
                                     <td class="quantity__item">
                                         <div class="quantity">
@@ -56,7 +57,7 @@
                                     </td>
                                     <td class="cart__price">₹ <%= cart.totalPrice %></td>
                                     <td>
-                                        <h6><%= cart.status %></h6>
+                                        <h5><%= cart.status %></h5>
                                     </td>
                                     <td>
                                         <% if (cart.status === 'delivered') { %>
@@ -65,8 +66,10 @@
                                             Return
                                         </button>
                                         <% } else if (cart.status === 'cancelled') { %>
-                                        <p></p>
-                                        <% } else { %>
+                                            <p></p>
+                                        <% } else if (cart.status === 'returned') { %> 
+                                            <p></p>   
+                                        <% } else { %> 
                                         <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                                             data-bs-target="#cancelModal<%= cart._id %>">
                                             Cancel
@@ -83,6 +86,7 @@
             </div>
         </div>
     </div>
+</div>
     
     
     
@@ -175,32 +179,32 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Reason for cancellation</h1>
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Reason for return</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="form-check">
-                        <input type="radio" id="cancelReason" name="cancelReason" value="Change of Mind"
+                        <input type="radio" id="returnReason" name="returnReason" value="Defective Product"
                             required>
-                        <label>Change of Mind</label>
+                        <label>Defective Product</label>
                     </div>
                     <div class="form-check">
-                        <input type="radio" id="cancelReason" name="cancelReason"
-                            value="Shipping or Delivery Concerns" required>
-                        <label>Shipping or Delivery Concerns</label>
+                        <input type="radio" id="returnReason" name="returnReason"
+                            value="Wrong Item Received" required>
+                        <label>Wrong Item Received</label>
                     </div>
                     <div class="form-check">
-                        <input type="radio" id="cancelReason" name="cancelReason" value="Payment Issues"
+                        <input type="radio" id="returnReason" name="returnReason" value="Size or Fit Issues"
                             required>
-                        <label>Payment Issues</label>
+                        <label>Size or Fit Issues</label>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary"
                         data-bs-dismiss="modal">Close</button>
-                    <button type="button" onclick="cancelOrder('<%= cart._id %>')"
-                        class="btn btn-danger">Cancel</button>
+                    <button type="button" onclick="returnOrder('<%= cart._id %>')"
+                        class="btn btn-danger">Return</button>
                 </div>
             </div>
         </div>
@@ -211,44 +215,79 @@
     
 
 
-                            <script>
+<script>
 
-                                function cancelOrder(cartId) {
+function cancelOrder(cartId) {
 
-                                    const cancelReason = document.querySelector('input[name="cancelReason"]:checked').value;
+const cancelReason = document.querySelector('input[name="cancelReason"]:checked').value;
 
-                                    $.ajax({
-                                        url: '/cancel-order',
-                                        method: 'post',
-                                        data: {
-                                            crId: cartId,
-                                            reason: cancelReason
-                                        },
-                                        success: (response) => {
-                                            if (response.success) {
-                                                Swal.fire({
-                                                    title: 'Cancelled',
-                                                    icon: 'success',
-                                                    text: 'Order Cancelled Successfully',
-                                                    timer: 1500
-                                                }).then(() => {
-                                                    window.location.href = '/profile';
-                                                });
-                                            } else {
-                                                Swal.fire({
-                                                    title: 'Error',
-                                                    icon: 'error',
-                                                    text: 'Order Cancellation Failed',
-                                                    timer: 1500
-                                                });
-                                            }
-                                        }
-                                    });
-                                }
-
-
-                            </script>
+    $.ajax({
+        url: '/cancel-order',
+        method: 'post',
+        data: {
+            crId: cartId,
+            reason: cancelReason
+            },
+            success: (response) => {
+            if (response.success) {
+                Swal.fire({
+                    title: 'Cancelled',
+                    icon: 'success',
+                    text: 'Order Cancelled Successfully',
+                    timer: 1500
+                }).then(() => {
+                       location.reload()
+                    });
+                } else {
+                    Swal.fire({
+                    title: 'Error',
+                    icon: 'error',
+                    text: 'Order Cancellation Failed',
+                    timer: 1500
+                });
+            }
+        }
+    });
+}
 
 
+function returnOrder(cartId) {
+    alert(cartId)
 
-                            <%- include("../user/layouts/userfooter.ejs") %>
+const returnReason = document.querySelector('input[name="returnReason"]:checked').value;
+
+$.ajax({
+    url: '/return-order',
+    method: 'post',
+    data: {
+        crId: cartId,
+        reason: returnReason
+    },
+    success: (response) => {
+        if (response.success) {
+            Swal.fire({
+                title: 'Returned',
+                icon: 'success',
+                text: 'Order Returned Successfully',
+                timer: 1500
+            }).then(() => {
+                location.reload()
+            });
+        } else {
+            Swal.fire({
+                title: 'Error',
+                icon: 'error',
+                text: 'Order Return Failed',
+                timer: 1500
+            });
+        }
+    }
+});
+}
+
+
+</script>
+
+
+
+<%- include("../user/layouts/userfooter.ejs") %>
