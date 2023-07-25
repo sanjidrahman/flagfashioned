@@ -6,6 +6,7 @@ const cartController = require('../controllers/cartController')
 const checkoutController = require('../controllers/checkoutController')
 const orderController = require('../controllers/orderController')
 const wishlistController = require('../controllers/wishlistController')
+const couponController = require('../controllers/couponController')
 const auth = require('../middleware/userAuth')
 const nocache = require('nocache')
 
@@ -57,6 +58,7 @@ user_route.post('/checkout-delete' , checkoutController.deleteAddress)
 user_route.post('/checkout' , checkoutController.placeOrder)
 user_route.post('/verifypayment' , checkoutController.verifypayment)
 
+user_route.post('/coupon' , couponController.coupon)
 
 user_route.post('/cancel-order' , orderController.cancelOrder)
 user_route.post('/return-order' , orderController.returnOrder)

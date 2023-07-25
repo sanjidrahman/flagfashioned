@@ -70,14 +70,15 @@ const loadOrder = async (req, res, next) => {
             pages = req.query.pages
         }
 
-        const limit = 6
+        const limit = 7
 
         const orders = await Order.find({})
             .limit(limit * 1)
             .skip((pages - 1) * limit)
+            .sort({date : -1})
 
         const count = await Order.find({}).sort({ date: -1 })
-            .countDocuments()
+        .countDocuments()
 
         res.render('orders', {
             orders,

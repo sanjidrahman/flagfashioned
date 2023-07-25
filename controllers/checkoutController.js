@@ -3,6 +3,7 @@ const User = require('../models/userModel')
 const Product = require('../models/productModel')
 const Cart = require('../models/cartModel')
 const Order = require('../models/orderModel')
+const Coupon = require('../models/couponModel')
 const Razorpay = require('razorpay');
 const { update } = require('./orderController')
 
@@ -141,9 +142,11 @@ const deleteAddress = async (req, res, next) => {
 const placeOrder = async (req , res , next) => {
     try {
 
+
         const bodyaddress = req.body.selectedAddress
         const total = req.body.total
         const payment = req.body.payment
+        const code = req.body.code
         
        let status = payment == 'cod' ? 'placed' : 'pending'
 
@@ -174,6 +177,7 @@ const placeOrder = async (req , res , next) => {
 
         if(orderData.status === 'placed') {
            await Cart.deleteOne({ user : req.session.user_id})
+           await Coupon.findOneAndUpdate({ code: code }, { $push: { user: req.session.user_id } });
 
            for(let i=0 ; i< cartProducts.length ; i++) {
             const productId = cartProducts[i].productId
@@ -210,6 +214,10 @@ const placeOrder = async (req , res , next) => {
 const verifypayment = async (req, res , next) => {
     try {
         let userData = await User.findOne({ _id : req.session.user_id })
+        const code = req.body.coupon
+        
+        const cartData = await Cart.findOne({ user : req.session.user_id })
+        const cartProducts = cartData.products
 
         const details = (req.body);
 
@@ -218,13 +226,20 @@ const verifypayment = async (req, res , next) => {
         hmac.update(details.payment.razorpay_order_id + '|' + details.payment.razorpay_payment_id)
         hmac = hmac.digest('hex')
         if (hmac == details.payment.razorpay_signature) {
-            await Order.findByIdAndUpdate({
-                _id: details.order.receipt
-            },
+            await Order.findByIdAndUpdate(
+                { _id: details.order.receipt},
                 { $set: { paymentId: details.payment.razorpay_payment_id } })
 
-            const data = await Order.findByIdAndUpdate({ _id: details.order.receipt }, { $set: { status: "placed" } })
+                // decrease stock amount 
+            for(let i=0 ; i< cartProducts.length ; i++) {
+                const productId = cartProducts[i].productId
+                const count = cartProducts[i].quantity
+                await Product.findByIdAndUpdate({ _id : productId } , { $inc : { stock : -count }})
+            }
+
+            await Order.findByIdAndUpdate({ _id: details.order.receipt }, { $set: { status: "placed" } })
             await Cart.deleteOne({ user: userData._id })
+            await Coupon.findOneAndUpdate({ code: code }, { $push: { user: req.session.user_id } });
             res.json({ success: true , params : details.order.receipt })
         } else {
             await Order.deleteOne({ _id: details.order.receipt });
@@ -237,6 +252,8 @@ const verifypayment = async (req, res , next) => {
     }
 }
 
+
+
 module.exports = {
     checkoutAddAddress,
     loadAddAddress,
@@ -244,5 +261,5 @@ module.exports = {
     editAddress,
     deleteAddress,
     placeOrder,
-    verifypayment
+    verifypayment,
 }

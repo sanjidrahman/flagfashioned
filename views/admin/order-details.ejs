@@ -48,7 +48,6 @@
                             <th class="text-white">Quantity</th>
                             <th class="text-white">Price</th>
                             <th class="text-white">Total Price</th>
-                            <th class="text-white">Current Status</th>
                             <th class="text-white">Change Status</th>
                             <th class="text-white">Action</th>
                         </tr>
@@ -63,17 +62,16 @@
                             <td class="text-white"><%= product.quantity %></td>
                             <td class="text-white">₹ <%= product.price %></td>
                             <td class="text-white">₹ <%= product.totalPrice %></td>
-                            <td class="text-white"><%= product.status %></td>
                             <td class="text-white">
                                 <form action="/admin/order-details" method="post">
-                                <select name="status" id="statusDropdown" class="custom-dropdown">
-                                    <option value="placed">Placed</option>
-                                    <option value="processing">Processing</option>
-                                    <option value="shipped">Shipped</option>
-                                    <option value="out for delivery">Out for Delivery</option>
-                                    <option value="delivered">Delivered</option>
-                                    <option value="cancelled">Cancelled</option>
-                                </select>
+                                    <select name="status" id="statusDropdown" class="custom-dropdown" aria-valuenow="<%= product.status %>">
+                                        <option value="placed" <% if (product.status === 'placed') { %> selected <% } %>>Placed</option>
+                                        <option value="processing" <% if (product.status === 'processing') { %> selected <% } %>>Processing</option>
+                                        <option value="shipped" <% if (product.status === 'shipped') { %> selected <% } %>>Shipped</option>
+                                        <option value="out for delivery" <% if (product.status === 'out for delivery') { %> selected <% } %>>Out for Delivery</option>
+                                        <option value="delivered" <% if (product.status === 'delivered') { %> selected <% } %>>Delivered</option>
+                                        <option value="cancelled" <% if (product.status === 'cancelled') { %> selected <% } %>>Cancelled</option>
+                                    </select>
                                 <input type="hidden" value="<%= product._id %>" name="pid">
                                 <input type="hidden" value="<%= order._id %>" name="oid">
                             </td>

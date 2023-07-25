@@ -1,0 +1,64 @@
+<%- include("../admin/layouts/adminHeader.ejs") %>
+<%- include("../admin/layouts/adminSidebar.ejs") %>
+<%- include("../admin/layouts/adminNavbar.ejs") %>
+
+<style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+</style>
+
+<div class="container" style="margin-top: 100px;">
+    <a class="btn btn-primary" href="/admin/add-coupon">Add Coupon</a>
+    <% if (coupons && coupons.length > 0) { %>
+    <h2 class="mt-4">Coupons List</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="text-white">Coupon Code</th>
+                <th class="text-white">Discount Percentage</th>
+                <th class="text-white">Start Date</th>
+                <th class="text-white">Expiry Date</th>
+                <th class="text-white">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% coupons.forEach(coupon=> { %>
+            <tr>
+                <td class="text-white">
+                    <%= coupon.code %>
+                </td>
+                <td class="text-white">
+                    <%= coupon.discountPercentage %> %
+                </td>
+                <td class="text-white">
+                    <%= coupon.startDate.toLocaleDateString('en-US', { year: 'numeric' ,
+                    month: 'short' , day: '2-digit' }).replace(/\//g,'-') %>
+                </td>
+                <td class="text-white">
+                    <%= coupon.expireDate.toLocaleDateString('en-US', { year: 'numeric' ,
+                    month: 'short' , day: '2-digit' }).replace(/\//g,'-') %>
+                </td>
+                <td>
+                    <a class="btn btn-danger" href="/admin/delete-coupon?id=<%= coupon._id %>">Delete</a>
+                </td>
+                <td>
+                    <a class="btn btn-primary" href="/admin/edit-coupon?id=<%= coupon._id %>">Edit</a>
+                </td>
+            </tr>
+            <% }) %>
+        </tbody>
+    </table>
+    <div class="text-center">
+        <% for(i=1 ; i<= totalPages ; i++) { %>
+            <a href="?page=<%= i %>"><%= i %></a>
+        <% } %>
+    </div>
+    <% } else { %>
+    <h2 class="mt-3">No Coupons Found.</h2>
+    <% } %>
+</div>
+
+
+
+%- include("../admin/layouts/adminFooter.ejs") %>
