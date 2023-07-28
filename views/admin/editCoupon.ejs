@@ -18,6 +18,11 @@
             <div class="error-message" style="color: red;" id="discountError"></div>
           </div>
           <div class="mb-3">
+            <label for="minimum" class="form-label">Minimum Amount</label>
+            <input type="number" class="form-control" id="minimum" name="minimum" style="color: white;" value="<%= coupons.discountPercentage %>" required>
+            <div class="error-message" style="color: red;" id="discountError"></div>
+          </div>
+          <div class="mb-3">
             <label for="startDate" class="form-label">Start Date</label>
             <input type="date" class="form-control" id="startDate" style="color: white;" name="startDate" value="<%= coupons.startDate %>" required>
             <div class="error-message" style="color: red;" id="startDateError"></div>

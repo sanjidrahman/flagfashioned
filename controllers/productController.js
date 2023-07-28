@@ -128,7 +128,7 @@ const editProduct = async (req, res) => {
 
         const imageUpdate = await Product.findByIdAndUpdate({ _id: req.body.id }, { $push: { image: { $each: images } } })
         if (imageUpdate) {
-            res.redirect(`/admin/edit-product?id=${req.body.id}`)
+            res.redirect(`/admin/product`)
         }
 
         const id = req.body.id

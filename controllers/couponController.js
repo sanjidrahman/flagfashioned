@@ -49,7 +49,8 @@ const addCoupon = async (req , res , next) => {
                 code : req.body.code,
                 discountPercentage : req.body.discountPercentage,
                 startDate : req.body.startDate,
-                expireDate : req.body.expiryDate
+                expireDate : req.body.expiryDate,
+                minimum : req.body.minimum
             })
 
             await newCoupon.save()
@@ -85,7 +86,8 @@ const editCoupon = async (req , res , next) => {
                 code : req.body.code,
                 discountPercentage : req.body.discountPercentage,
                 startDate : req.body.startDate,
-                expireDate : req.body.expiryDate
+                expireDate : req.body.expiryDate,
+                minimum : req.body.minimum
             }})
         
             res.redirect('/admin/coupon')
@@ -100,8 +102,23 @@ const deleteCoupon = async (req , res , next) => {
 
         const id = req.query.id
         await Coupon.findOneAndDelete({_id : id})
+        
+        var page = 1
+        if(req.query.page) {
+            page = req.query.page
+        }
 
-        res.render('couponList')
+        const limit = 5
+        const coupons = await Coupon.find({})
+        .limit(limit * 1)
+        .skip((page-1)*limit)
+
+        const count = await Coupon.find({}).countDocuments()
+
+        res.render('couponList' , { 
+            coupons ,
+            totalPages : Math.ceil(count / limit)
+        })
         
     } catch (err) {
         next(err.message)
@@ -110,34 +127,34 @@ const deleteCoupon = async (req , res , next) => {
 
 // -----------USER SIDE----------
 
-const coupon = async (req , res , next) => {
-    try {
+// const coupon = async (req , res , next) => {
+//     try {
 
-        const coupon = req.body.coupon
-        console.log(coupon);
-       const total = req.body.total
+//         const coupon = req.body.coupon
+//         console.log(coupon);
+//         const total = req.body.total
 
-        const couponData = await Coupon.findOne({ code : coupon })
+//         const couponData = await Coupon.findOne({ code : coupon })
 
-        if(couponData) {
-           const userExist = couponData.user.find((u) => u._id.toString() == req.session.user_id)
-           if(userExist) {
-            res.render('/chechout' , { message : 'cannot user coupon anymore' })
-           }else{
+//         if(couponData) {
+//            const userExist = couponData.user.find((u) => u._id.toString() == req.session.user_id)
+//            if(userExist) {
+//             res.json({ sucess : false , message : 'user have used' })
+//            }else{
 
-            const discountTotal = (couponData.discountPercentage/100)*total
-            console.log(discountTotal);
+//             const discountTotal = (couponData.discountPercentage/100)*total
+//             console.log(discountTotal);
 
-            res.render('/checkout' , { discountTotal })
+//             res.json({ success : true })
 
-           }
-        }
+//            }
+//         }
         
         
-    } catch (err) {
-        console.log(err.message);
-    }
-}
+//     } catch (err) {
+//         next(err.message);
+//     }
+// }
  
 
 module.exports = {
@@ -147,5 +164,5 @@ module.exports = {
     loadEditCoupon,
     editCoupon,
     deleteCoupon,
-    coupon
+    // coupon
 }

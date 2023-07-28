@@ -40,33 +40,15 @@
                                     <div class="card-body">
                                         <div class="shop__sidebar__categories">
                                             <ul class="nice-scroll">
-                                                <li><a href="/shop?filter=All">All</a></li>
+                                                <li><a href="/shop?filter=All<% if(search) { %>&&search=<%= search %><% } %><% if (sort) { %>&&sort=<%= sort %><% } %>">All</a></li>
                                                 <% categories.forEach(category => { %>
-                                                  <li><a href="/shop?filter=<%= category.name %>"> <%= category.name %> </a></li>
+                                                  <li><a href="/shop?filter=<%= category.name %><% if (search) { %>&&search=<%= search %><% } %><% if (sort) { %>&&sort=<%= sort %><% } %>"> <%= category.name %> </a></li>
                                                 <% }) %>
                                               </ul>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card">
-                                <div class="card-heading">
-                                    <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
-                                </div>
-                                <div id="collapseTwo" class="collapse show" data-parent="#accordionExample">
-                                    <div class="card-body">
-                                        <div class="shop__sidebar__brand">
-                                            <ul>
-                                                <li><a href="#">Louis Vuitton</a></li>
-                                                <li><a href="#">Chanel</a></li>
-                                                <li><a href="#">Hermes</a></li>
-                                                <li><a href="#">Gucci</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-        
                         </div>
                     </div>
                 </div>
@@ -82,11 +64,11 @@
                         <div class="col-lg-6 col-md-6 col-sm-6">
                             <div class="shop__product__option__right">
                                 <p>Sort by Price:</p>
-                                <select name="sort">
+                                <select id="sort-select" name="sort" onchange="updateSortValue()" >
                                     <option value="Low To High">Low To High</option>
                                     <option value="High To Low">High To Low</option>
                                 </select>
-                            </div>
+                            </div>                            
                         </div>
                     </div>
                 </div>
@@ -130,5 +112,18 @@
     </div>
 </section>
 <!-- Shop Section End -->
+
+<script>
+
+    function updateSortValue() {
+
+    const sortKey = document.getElementById('sort-select').value
+    if(sortKey) {
+        window.location.href = `/shop?sort=${sortKey}`
+    }
+
+    }
+
+</script>
 
 <%- include("../user/layouts/userfooter.ejs") %>

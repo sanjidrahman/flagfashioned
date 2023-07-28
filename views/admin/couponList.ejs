@@ -17,6 +17,7 @@
             <tr>
                 <th class="text-white">Coupon Code</th>
                 <th class="text-white">Discount Percentage</th>
+                <th class="text-white">Minimum Spend</th>
                 <th class="text-white">Start Date</th>
                 <th class="text-white">Expiry Date</th>
                 <th class="text-white">Actions</th>
@@ -30,6 +31,9 @@
                 </td>
                 <td class="text-white">
                     <%= coupon.discountPercentage %> %
+                </td>
+                <td class="text-white">
+                    <%= coupon.minimum %> 
                 </td>
                 <td class="text-white">
                     <%= coupon.startDate.toLocaleDateString('en-US', { year: 'numeric' ,

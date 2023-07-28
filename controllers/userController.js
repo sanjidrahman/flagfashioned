@@ -73,107 +73,56 @@ const loadHome = async (req, res) => {
 const loadShop = async (req, res) => {
     try {
 
-        var filter = null
-        if (req.query.filter) {
-            filter = req.query.filter
+        const sort = req.query.sort || 'none'
+        const filter = req.query.filter || 'All';
+        const search = req.query.search || null;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 6;
+
+        const category = await Category.find({ is_delete: false });
+        const searchQuery = search ? { name: { $regex: new RegExp(search, 'i') } } : {};
+
+        const query = {
+            is_delete: 0,
+            ...searchQuery
+        };
+
+
+        if (filter && filter !== 'All') {
+            query.category = filter;
         }
 
-        var search = ''
-        if (req.query.search) {
-            search = req.query.search
+        let sortOptions = {};
+
+        if (sort === 'Low To High') {
+            sortOptions = { price: 1 };
+        } else if (sort === 'High To Low') {
+            sortOptions = { price: -1 };
         }
 
-        var page = 1
-        if (req.query.page) {
-            page = req.query.page
-        }
+        const product = await Product.find(query)
+            .limit(limit)
+            .skip((page - 1) * limit)
+            .sort(sortOptions)
+            .exec();
 
-        const limit = 6
+        const count = await Product.countDocuments(query);
 
-        const category = await Category.find({ is_delete: false })
-
-        if (filter) {
-            if (filter == 'All') {
-                const product = await Product.find({
-                    is_delete: 0,
-                    name: { $regex: '.*' + search + '.*', $options: 'i' }
-                })
-                    .limit(limit * 1)
-                    .skip((page - 1) * limit)
-                    .exec()
-
-                const count = await Product.find({
-                    is_delete: 0,
-                    name: {
-                        $regex: '.*' + search + '.*', $options: 'i'
-                    }
-                }).countDocuments()
-
-
-                res.render('shop', {
-                    categories: category,
-                    products: product,
-                    session: req.session.user_id,
-                    totalPages: Math.ceil(count / limit),
-                    currentPage: page
-                })
-            } else {
-                const product = await Product.find({
-                    is_delete: 0,
-                    category: filter,
-                    name: { $regex: '.*' + search + '.*', $options: 'i' }
-                })
-                    .limit(limit * 1)
-                    .skip((page - 1) * limit)
-                    .exec()
-
-                const count = await Product.find({
-                    is_delete: 0,
-                    name: {
-                        $regex: '.*' + search + '.*', $options: 'i'
-                    }
-                }).countDocuments()
-
-
-                res.render('shop', {
-                    categories: category,
-                    products: product,
-                    session: req.session.user_id,
-                    totalPages: Math.ceil(count / limit),
-                    currentPage: page
-                })
-
-            }
-        } else {
-
-            const product = await Product.find({
-                is_delete: 0,
-                name: { $regex: '.*' + search + '.*', $options: 'i' }
-            })
-                .limit(limit * 1)
-                .skip((page - 1) * limit)
-                .exec()
-
-            const count = await Product.find({
-                is_delete: 0,
-                name: {
-                    $regex: '.*' + search + '.*', $options: 'i'
-                }
-            }).countDocuments()
-
-
-            res.render('shop', {
-                categories: category,
-                products: product,
-                session: req.session.user_id,
-                totalPages: Math.ceil(count / limit),
-                currentPage: page
-            })
-        }
+        res.render('shop', {
+            categories: category,
+            products: product,
+            session: req.session.user_id,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+            filter,
+            search,
+            sort
+        });
     } catch (err) {
         console.log(err.message);
     }
-}
+};
+
 
 const loadLogin = async (req, res) => {
     try {
@@ -328,7 +277,7 @@ const loadShopDetails = async (req, res) => {
 const loadProifle = async (req, res) => {
     try {
 
-        const orders = await Order.find({ user: req.session.user_id }).populate('products.productId');
+        const orders = await Order.find({ user: req.session.user_id, status: 'placed' }).populate('products.productId').sort({ date: -1 })
 
         const address = await Address.findOne({ user: req.session.user_id })
         const users = await User.findOne({ _id: req.session.user_id })
@@ -403,32 +352,37 @@ const loadCheckOut = async (req, res, next) => {
         let grandTotal = 0;
 
         if (cartData) {
-                cartData.products.forEach((product) => {
+            cartData.products.forEach((product) => {
                 total = total + product.price * product.quantity;
                 grandTotal = grandTotal + product.price * product.quantity;
             });
 
             if (couponData) {
                 const exUser = couponData.user.find((user) => user.toString() == req.session.user_id);
-                console.log(exUser);
                 if (exUser) {
-                     return res.redirect('/checkout')
+                    return res.redirect('/checkout')
                 } else {
-                    if(new Date() <= couponData.expireDate) {
-                        total = total - (couponData.discountPercentage / 100) * total;
-            
-                        return res.render('checkout', {
-                            session: req.session.user_id,
-                            addresses: address,
-                            cart: cartData,
-                            total: total,
-                            grandTotal,
-                            couponData,
-                            coupons,
-                            coupon: req.query.coupon
-                        });
+                    if (new Date() <= couponData.expireDate) {
+                        if (total >= couponData.minimum) {
+                            total = total - (couponData.discountPercentage / 100) * total;
+
+                            return res.render('checkout', {
+                                session: req.session.user_id,
+                                addresses: address,
+                                cart: cartData,
+                                total: total,
+                                grandTotal,
+                                couponData,
+                                coupons,
+                                coupon: req.query.coupon
+                            });
+                        }else{
+                            return res.redirect('/checkout')
+                        }
+                    }else{
+                         return res.redirect('/checkout')
                     }
-                }     
+                }
             }
 
             return res.render('checkout', {
@@ -469,8 +423,7 @@ const loadOrderDetails = async (req, res, next) => {
         const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).replace(/\//g, '-')
 
         const orderId = req.params.id
-        const orderData = await Order.findOne({ 'products._id': orderId }).populate('products.productId')
-        console.log(orderData);
+        const orderData = await Order.findOne({ _id: orderId }).populate('products.productId')
         res.render('view-order-details', { session: req.session.user_id, order: orderData })
 
     } catch (err) {

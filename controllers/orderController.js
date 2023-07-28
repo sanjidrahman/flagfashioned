@@ -7,22 +7,29 @@ const Order = require('../models/orderModel')
 const cancelOrder = async (req, res, next) => {
     try {
 
-        const param = req.body.param
-        const reason = req.body.reason
         const id = req.body.crId
+        const reason = req.body.reason
+        const orderId = req.body.id
 
-        const orderData = await Order.findOne({ 'products._id': id })
-        const product = orderData.products.find((product) => product._id.toString() === id)
+        const orderData = await Order.findOne({ 'products._id' : id })
+        const order = orderData.products
 
-        const cancel = await Order.findOneAndUpdate({ user: req.session.user_id, 'products._id': id }, {
+        for(let i=0 ; i < order.length ; i++) {
+          const productId = order[i].productId
+          const quantity = order[i].quantity
+          await Product.findByIdAndUpdate({ _id : productId } , { $inc : { stock : quantity }})
+        }
+        const cancel = await Order.findOneAndUpdate({ _id: orderId, 'products._id': id }, {
             $set: {
                 'products.$.status': 'cancelled',
                 'products.$.cancelReason': reason
             }
         })
 
+        console.log(cancel);
+
         if (cancel) {
-            res.json({ success: true , param })
+            res.json({ success: true  })
         } else {
             res.json({ success: false })
         }
@@ -37,11 +44,19 @@ const returnOrder = async (req, res, next) => {
 
         const reason = req.body.reason
         const id = req.body.crId
+        const orderId = req.body.id
 
-        const orderData = await Order.findOne({ 'products._id': id })
-        const product = orderData.products.find((product) => product._id.toString() === id)
+        const orderData = await Order.findOne({ 'products._id' : id })
+        const order = orderData.products
+        console.log(order);
 
-        const cancel = await Order.findOneAndUpdate({ user: req.session.user_id, 'products._id': id }, {
+        for(let i=0 ; i < order.length ; i++) {
+          const productId = order[i].productId
+          const quantity = order[i].quantity
+          console.log(quantity);
+          await Product.findByIdAndUpdate({ _id : productId } , { $inc : { stock : quantity }})
+        }
+        const cancel = await Order.findOneAndUpdate({ _id : orderId , 'products._id': id }, {
             $set: {
                 'products.$.status': 'returned',
                 'products.$.returnReason': reason
@@ -199,11 +214,125 @@ const salesReport = async (req, res, next) => {
     }
 }
 
+const sortSalesReport = async (req, res, next) => {
+    try {
+
+        var page = 1
+        if(req.query.page) {
+            page = req.query.page
+        }
+
+        var limit = page == 1 ? 3 : 6
+        
+        
+      let fromDate = req.body.fromDate ? new Date(req.body.fromDate) : null;
+      fromDate.setHours(0, 0, 0, 0);
+      let toDate = req.body.toDate ? new Date(req.body.toDate) : null;
+      toDate.setHours(23, 59, 59, 999);
+
+      const currentDate = new Date();
+
+  
+      if (fromDate && toDate) {
+        if (toDate < fromDate) {
+          const temp = fromDate;
+          fromDate = toDate;
+          toDate = temp;
+        }
+      } else if (fromDate) {
+        toDate = currentDate;
+      } else if (toDate) {
+        fromDate = currentDate;
+      }
+
+
+      console.log(fromDate)
+      console.log(toDate)
+  
+      var matchStage = {
+        'products.status': 'delivered',
+        createdAt : { $gte: fromDate, $lte: toDate },
+      };
+  
+      const totalOrders = await Order.aggregate([
+        { $unwind: '$products' },
+        { $match: matchStage },
+        { $group: { _id: null, total: { $sum: 1 } } },
+      ]);
+
+      console.log(totalOrders);
+  
+      const totalAmount = await Order.aggregate([
+        { $unwind: '$products' },
+        { $match: matchStage },
+        { $group: { _id: null, total: { $sum: '$products.totalPrice' } } },
+      ]);
+
+      console.log(totalAmount);
+
+      const totalSold = await Order.aggregate([
+        { $unwind: '$products' },
+        { $match: matchStage },
+        { $group: { _id: null, total: { $sum: '$products.quantity' } } },
+        { $project: { total: 1, _id: 0 } },
+      ]);
+
+      console.log(totalSold);
+
+      const product = await Order.aggregate([
+        { $unwind: '$products' },
+        { $match: matchStage },
+        { $group: {
+            _id: '$products.productId',
+            totalQuantitySold: { $sum: '$products.quantity' },
+            totalRevenueGenerated: { $sum: '$products.totalPrice' },
+          },
+        },
+        { $lookup: { from: 'products', localField: '_id', foreignField: '_id', as: 'productData' } },
+        { $unwind: '$productData' },
+        { $project: { productName: '$productData.name', productImage: { $arrayElemAt: ['$productData.image', 0] }, totalQuantitySold: 1, totalRevenueGenerated: 1 } },
+      ]).limit(limit * 1).skip((page - 1) * limit).exec();
+
+      console.log(product);
+
+  
+      const result = await Order.aggregate([
+        { $unwind: '$products' },
+        { $match: matchStage },
+        { $group: {
+            _id: '$products.productId',
+            totalQuantitySold: { $sum: '$products.quantity' },
+            totalRevenueGenerated: { $sum: '$products.totalPrice' },
+          },
+        },
+        { $lookup: { from: 'products', localField: '_id', foreignField: '_id', as: 'productData' } },
+        { $unwind: '$productData' },
+        { $project: { productName: '$productData.name', productImage: { $arrayElemAt: ['$productData.image', 0] }, totalQuantitySold: 1, totalRevenueGenerated: 1 } },
+      ]);
+  
+      const count = result.length;
+  
+      res.render('sales-report', { 
+        totalOrders,
+        totalAmount,
+        totalSold,
+        product,
+        totalPages: Math.ceil(count / limit),
+        fromDate,
+        toDate,
+      });
+    } catch (err) {
+      next(err.message);
+    }
+  };
+  
+
 module.exports = {
     cancelOrder,
     returnOrder,
     loadOrder,
     orderDetails,
     update,
-    salesReport
+    salesReport,
+    sortSalesReport
 }

@@ -46,7 +46,7 @@
                                             <h6><%= cart.productId.name %></h6>
                                             <h5>₹<%= cart.productId.price %></h5>
                                         </div>
-                                        <input type="hidden" name="param" value="<%= cart._id %>">
+                                        <input type="hidden" name="orderId" id="orderId" value="<%= order._id %>">
                                     </td>
                                     <td class="quantity__item">
                                         <div class="quantity">
@@ -220,13 +220,16 @@
 function cancelOrder(cartId) {
 
 const cancelReason = document.querySelector('input[name="cancelReason"]:checked').value;
+const id = document.getElementById('orderId').value
+console.log(id);
 
     $.ajax({
         url: '/cancel-order',
         method: 'post',
         data: {
             crId: cartId,
-            reason: cancelReason
+            reason: cancelReason,
+            id
             },
             success: (response) => {
             if (response.success) {
@@ -252,9 +255,9 @@ const cancelReason = document.querySelector('input[name="cancelReason"]:checked'
 
 
 function returnOrder(cartId) {
-    alert(cartId)
 
 const returnReason = document.querySelector('input[name="returnReason"]:checked').value;
+const id = document.getElementById('orderId').value
 
 $.ajax({
     url: '/return-order',

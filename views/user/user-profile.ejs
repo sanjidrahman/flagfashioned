@@ -218,54 +218,52 @@
                         <div class="card-body">
                             <h5 class="card-title">Order Details</h5>
                             <hr />
-                        
                             <% if (order.length > 0) { %>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Product</th>
-                                            <th>Quantity</th>
-                                            <th>Total</th>
-                                            <th>View Details</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% order.forEach((cart) => { %>
-                                        <% cart.products.forEach((item) => { %>
-                                        <tr class="cart-item">
-                                            <td class="product__cart__item">
-                                                <div class="product__cart__item__pic">
-                                                    <img src="/adminassets/productImages/<%= item.productId.image[0] %>"
-                                                        alt="<%= item.productId.name %>" style="height: 70px; width: 70px;">
-                                                </div>
-                                                <div class="product__cart__item__text">
-                                                    <h6><%= item.productId.name %></h6>
-                                                    <h5>₹<%= item.productId.price %></h5>
-                                                </div>
-                                            </td>
-                                            <td class="quantity__item">
-                                                <div class="quantity">
-                                                    <div class="pro-qty-2">
-                                                        <input type="text" class="gty-text" value="<%= item.quantity %>" readonly>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="cart__price" style="font-size: 15px;">₹ <%= item.totalPrice %></td>
-                                            <td>
-                                                <a class="view-details-btn btn btn-primary btn-sm" href="/order-details/<%= item._id %>">View
-                                                    Details</a>
-                                            </td>
-                                        </tr>
-                                        <% }) %>
-                                        <% }); %>
-                                    </tbody>
-                                </table>
-                            </div>
+                                <% order.forEach((cart) => { %>
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Product</th>
+                                                        <th>Quantity</th>
+                                                        <th>Total</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% cart.products.forEach((item) => { %>
+                                                    <tr class="cart-item">
+                                                        <td class="product__cart__item">
+                                                            <div class="product__cart__item__pic">
+                                                                <img src="/adminassets/productImages/<%= item.productId.image[0] %>"
+                                                                    alt="<%= item.productId.name %>" style="height: 70px; width: 70px;">
+                                                            </div>
+                                                            <div class="product__cart__item__text">
+                                                                <h6><%= item.productId.name %></h6>
+                                                                <h5>₹<%= item.productId.price %></h5>
+                                                            </div>
+                                                        </td>
+                                                        <td class="quantity__item">
+                                                            <div class="quantity">
+                                                                <!-- Display the quantity as plain text -->
+                                                                <p><%= item.quantity %></p>
+                                                            </div>
+                                                        </td>
+                                                        <td class="cart__price" style="font-size: 15px;">₹ <%= item.totalPrice %></td>
+                                                    </tr>
+                                                    <% }) %>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <a class="view-details-btn btn btn-primary btn-sm" href="/order-details/<%= cart._id %>">View Details</a>
+                                    </div>
+                                </div>
+                                <% }) %>
                             <% } else { %>
-                            <h3>No orders found</h3>
+                                <h3>No orders found</h3>
                             <% } %>
-                        </div>
+                        </div>                                                         
                         
                     </div>
 

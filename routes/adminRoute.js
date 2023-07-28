@@ -5,6 +5,7 @@ const categoryController = require('../controllers/categoryController')
 const productController = require('../controllers/productController')
 const orderController = require('../controllers/orderController')
 const couponController = require('../controllers/couponController')
+const bannerController = require('../controllers/bannerController')
 const auth = require('../middleware/adminAuth')
 const upload = require('../middleware/multer')
 const nocache = require('nocache')
@@ -46,6 +47,7 @@ admin_route.get('/order' , auth.isLogin , orderController.loadOrder)
 admin_route.get('/order-detail' , auth.isLogin , orderController.orderDetails)
 admin_route.post('/order-details' , orderController.update)
 admin_route.get('/sales-report' , auth.isLogin , orderController.salesReport)
+admin_route.post('/sales-report' , orderController.sortSalesReport)
 
 
 admin_route.get('/coupon' , auth.isLogin , couponController.loadCoupon)
@@ -54,6 +56,13 @@ admin_route.post('/add-coupon' , auth.isLogin , couponController.addCoupon)
 admin_route.get('/edit-coupon' , auth.isLogin , couponController.loadEditCoupon)
 admin_route.post('/edit-coupon' , auth.isLogin , couponController.editCoupon)
 admin_route.get('/delete-coupon' , auth.isLogin , couponController.deleteCoupon)
+
+admin_route.get('/banner' , auth.isLogin , bannerController.loadBanner)
+admin_route.get('/add-banner' , auth.isLogin , bannerController.loadAddBanner)
+admin_route.post('/add-banner' , auth.isLogin , upload.upload.single('image') , bannerController.addBanner)
+admin_route.get('/edit-banner' , auth.isLogin , bannerController.loadEditBanner)
+admin_route.post('/add-banner' , auth.isLogin , bannerController.editBanner)
+
 
 
 module.exports = admin_route

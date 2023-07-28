@@ -44,48 +44,94 @@
     .sort-container label {
       font-weight: bold;
     }
+    table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  th,
+  td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+
+  th {
+    background-color: #101116;
+    color: #ffffff;
+  }
+
+  img {
+    max-width: 50px;
+    max-height: 50px;
+  }
+
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    th,
+    td {
+      padding: 8px;
+    }
+  }
   </style>
 
 <div class="container">
-    <% if (totalOrders && totalAmount && totalSold && product && totalOrders.length > 0 && totalAmount.length > 0 && totalSold.length > 0 && product.length > 0) { %>
-      <div class="card" style="margin-top: 70px;">
-        <h2>Total Orders: <%= totalOrders[0].total %></h2>
-        <h2>Total Amount Generated: <%= totalAmount[0].total %></h2>
-        <h2>Total Product Sold Quantity: <%= totalSold[0].total %></h2>
-      </div>
-      <div class="table-container">
+  <% if (totalOrders && totalAmount && totalSold && product && totalOrders.length > 0 && totalAmount.length > 0 && totalSold.length > 0 && product.length > 0) { %>
+    <div class="card" style="margin-top: 70px;">
+      <h2>Total Orders: <%= totalOrders[0].total %></h2>
+      <h2>Total Amount Generated: <%= totalAmount[0].total %></h2>
+      <h2>Total Product Sold Quantity: <%= totalSold[0].total %></h2>
+    </div>
+    <div class="table-container">
+      <form action="/admin/sales-report" method="post">
         <div class="sort-container mb-3">
           <label for="from-date">From Date:</label>
-          <input type="date" id="from-date">
+          <input type="date" id="from-date" name="fromDate" required>
           <label for="to-date">To Date:</label>
-          <input type="date" id="to-date">
+          <input type="date" id="to-date" name="toDate" required>
+          <button type="submit" id="get-report-btn" style="background-color: #558157; color: white; border: none; padding: 4px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; cursor: pointer; border-radius: 4px;">Get Report</button>
         </div>
-        <table>
-          <thead>
+        <button type="button" onclick="printDiv('printThisDiv')" class="btn btn-primary mt-3">Print</button>
+      </form>  
+    </div>
+      <div id="printThisDiv">    
+      <table>
+        <thead>
+          <tr>
+            <th>Product Image</th>
+            <th>Product Name</th>
+            <th>Total Sold</th>
+            <th>Amount Generated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% product.forEach((item) => { %>
             <tr>
-              <th>Product Image</th>
-              <th>Product Name</th>
-              <th>Total Sold</th>
-              <th>Amount Generated</th>
+              <td><img style="width: 50px; height: 50px;" src="/adminassets/productImages/<%= item.productImage %>" alt="<%= item.productName %>"></td>
+              <td><%= item.productName %></td>
+              <td><%= item.totalQuantitySold %></td>
+              <td>₹ <%= item.totalRevenueGenerated.toFixed(2) %></td>
             </tr>
-          </thead>
-          <tbody>
-            <% product.forEach((item) => { %>
-              <tr>
-                <td><img style="width: 50px; height: 50px;" src="/adminassets/productImages/<%= item.productImage %>" alt="<%= item.productName %>"></td>
-                <td><%= item.productName %></td>
-                <td><%= item.totalQuantitySold %></td>
-                <td>₹ <%= item.totalRevenueGenerated.toFixed(2) %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
-    <% } else { %>
-      <h2 style="margin-top: 100px;">No data available.</h2>
-    <% } %>
-  </div>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
   
+  <% } else { %>
+    <h2 style="margin-top: 100px;">No data available.</h2>
+  <% } %>
+</div>
+
+<script>
+  function printDiv(divName) {
+    const printContents = document.getElementById(divName).innerHTML;
+    const originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+  }
+</script>
 
 
 <%- include("../admin/layouts/adminFooter.ejs") %>
