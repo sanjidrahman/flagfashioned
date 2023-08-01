@@ -8,14 +8,14 @@ const Razorpay = require('razorpay');
 const { update } = require('./orderController')
 
 var instance = new Razorpay({
-  key_id: process.env.KEY_ID,
-  key_secret: process.env.KEY_SECRET,
+    key_id: process.env.KEY_ID,
+    key_secret: process.env.KEY_SECRET,
 });
 
 const loadAddAddress = async (req, res, next) => {
     try {
 
-        res.render('check-add-address' , { session : req.session.user_id })
+        res.render('check-add-address', { session: req.session.user_id })
 
     } catch (err) {
         next(err.message);
@@ -66,21 +66,21 @@ const checkoutAddAddress = async (req, res, next) => {
     }
 }
 
-const loadEditAddAddress = async (req , res , next) => {
+const loadEditAddAddress = async (req, res, next) => {
     try {
 
         const id = req.session.user_id
         const address_id = req.query.addressId
 
         const addressdata = await Address.findOne({ user: id }, { addresses: { $elemMatch: { _id: address_id } } });
-        res.render('checkout-edit-address', { address: addressdata.addresses[0] , session : req.session.user_id })
-        
+        res.render('checkout-edit-address', { address: addressdata.addresses[0], session: req.session.user_id })
+
     } catch (err) {
         next(err.message)
     }
 }
 
-const editAddress = async (req , res , next) => {
+const editAddress = async (req, res, next) => {
     try {
 
         const id = req.session.user_id
@@ -101,7 +101,7 @@ const editAddress = async (req , res , next) => {
         );
 
         res.redirect('/checkout')
-        
+
     } catch (err) {
         next(err.messsage)
     }
@@ -111,25 +111,25 @@ const deleteAddress = async (req, res, next) => {
     try {
         const addressId = req.body.addressId;
         const userId = req.session.user_id;
-        const address = await Address.findOne({ user : userId })
+        const address = await Address.findOne({ user: userId })
 
-        if(address.addresses.length === 1 ) {
+        if (address.addresses.length === 1) {
 
-            const daddress = await Address.deleteOne({ user : userId})
+            const daddress = await Address.deleteOne({ user: userId })
 
-            res.json({ success : true })
+            res.json({ success: true })
 
         } else {
 
             const daddress = await Address.findOneAndUpdate(
                 { user: userId, 'addresses._id': addressId },
-                { $pull: { addresses : { _id : addressId } } }
+                { $pull: { addresses: { _id: addressId } } }
             );
-            if(daddress) {
+            if (daddress) {
                 res.json({ success: true });
-            }else{
-                res.json({ success : false })
-            }  
+            } else {
+                res.json({ success: false })
+            }
 
         }
 
@@ -139,84 +139,93 @@ const deleteAddress = async (req, res, next) => {
 }
 
 
-const placeOrder = async (req , res , next) => {
+const placeOrder = async (req, res, next) => {
     try {
 
 
         const bodyaddress = req.body.selectedAddress
         const total = req.body.total
         const payment = req.body.payment
-        const code = req.body.code
-        
-       let status = payment == 'cod' ? 'placed' : 'pending'
+
+        let status = payment == 'cod' ? 'placed' : 'pending'
 
         userId = req.session.user_id
-        const user = await User.findOne({ _id : userId })
-        const cartData = await Cart.findOne({ user : userId })
+        const user = await User.findOne({ _id: userId })
+        const cartData = await Cart.findOne({ user: userId })
 
         const cartProducts = cartData.products
 
-        const orderDate = new Date(); 
+        const orderDate = new Date();
         const delivery = new Date(orderDate.getTime() + (10 * 24 * 60 * 60 * 1000));
         const deliveryDate = delivery.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).replace(/\//g, '-');
 
         const order = new Order({
-            user : userId,
-            deliveryAddress : bodyaddress,
-            userName : user.name,
-            totalAmount : total,
-            status : status,
-            date : orderDate,
-            payment : payment,
-            products : cartProducts,
-            expectedDelivery : deliveryDate
+            user: userId,
+            deliveryAddress: bodyaddress,
+            userName: user.name,
+            totalAmount: total,
+            status: status,
+            date: orderDate,
+            payment: payment,
+            products: cartProducts,
+            expectedDelivery: deliveryDate
         })
 
-        const orderData = await order.save() 
+        const orderData = await order.save()
         const orderid = orderData._id
 
-        if(orderData.status === 'placed') {
-           await Cart.deleteOne({ user : req.session.user_id})
-           await Coupon.findOneAndUpdate({ code: code }, { $push: { user: req.session.user_id } });
+        if (orderData.status === 'placed') {
+            await Cart.deleteOne({ user: req.session.user_id })
+            await Coupon.findOneAndUpdate({ code: code }, { $push: { user: req.session.user_id } });
 
-           for(let i=0 ; i< cartProducts.length ; i++) {
-            const productId = cartProducts[i].productId
-            const count = cartProducts[i].quantity
-            await Product.findByIdAndUpdate({ _id : productId } , { $inc : { stock : -count }})
-           }
-           
-            
-           res.json({ success : true , params : orderid })
-        }else{
+            for (let i = 0; i < cartProducts.length; i++) {
+                const productId = cartProducts[i].productId
+                const count = cartProducts[i].quantity
+                await Product.findByIdAndUpdate({ _id: productId }, { $inc: { stock: -count } })
+            }
+
+
+            res.json({ success: true, params: orderid })
+        } else {
 
             const orderId = orderData._id
             const total = orderData.totalAmount
 
             var options = {
-                amount: total * 100 ,
+                amount: total * 100,
                 currency: 'INR',
                 receipt: '' + orderId,
-              };
-      
+            };
+
             instance.orders.create(options, function (err, order) {
-                
+
                 res.json({ order });
-                
+
             });
         }
-        
+
     } catch (err) {
         next(err.message)
     }
 }
 
 
-const verifypayment = async (req, res , next) => {
+const verifypayment = async (req, res, next) => {
     try {
-        let userData = await User.findOne({ _id : req.session.user_id })
-        const code = req.body.coupon
-        
-        const cartData = await Cart.findOne({ user : req.session.user_id })
+        let userData = await User.findOne({ _id: req.session.user_id })
+        const code = req.body.code
+        console.log(code);
+        const coupon = await Coupon.findOne({ code: code })
+        const minus = coupon.discountPercentage / 100
+        const update = await Cart.findOneAndUpdate(
+            { user: req.session.user_id },
+            { $mul: { 'products.$[].totalPrice':  minus }},
+            { new: true }
+        )
+
+        console.log(update);
+
+        const cartData = await Cart.findOne({ user: req.session.user_id })
         const cartProducts = cartData.products
 
         const details = (req.body);
@@ -227,23 +236,23 @@ const verifypayment = async (req, res , next) => {
         hmac = hmac.digest('hex')
         if (hmac == details.payment.razorpay_signature) {
             await Order.findByIdAndUpdate(
-                { _id: details.order.receipt},
+                { _id: details.order.receipt },
                 { $set: { paymentId: details.payment.razorpay_payment_id } })
 
-                // decrease stock amount 
-            for(let i=0 ; i< cartProducts.length ; i++) {
+            // decrease stock amount 
+            for (let i = 0; i < cartProducts.length; i++) {
                 const productId = cartProducts[i].productId
                 const count = cartProducts[i].quantity
-                await Product.findByIdAndUpdate({ _id : productId } , { $inc : { stock : -count }})
+                await Product.findByIdAndUpdate({ _id: productId }, { $inc: { stock: -count } })
             }
 
             await Order.findByIdAndUpdate({ _id: details.order.receipt }, { $set: { status: "placed" } })
             await Cart.deleteOne({ user: userData._id })
             await Coupon.findOneAndUpdate({ code: code }, { $push: { user: req.session.user_id } });
-            res.json({ success: true , params : details.order.receipt })
+            res.json({ success: true, params: details.order.receipt })
         } else {
             await Order.deleteOne({ _id: details.order.receipt });
-            res.json({ success: false }); 
+            res.json({ success: false });
 
         }
 

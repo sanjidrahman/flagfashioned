@@ -2,6 +2,7 @@ const Product = require('../models/productModel')
 const Address = require('../models/addressModel')
 const Cart = require('../models/cartModel')
 const Order = require('../models/orderModel')
+const User = require('../models/userModel')
 
 
 const cancelOrder = async (req, res, next) => {
@@ -13,20 +14,22 @@ const cancelOrder = async (req, res, next) => {
 
         const orderData = await Order.findOne({ 'products._id' : id })
         const order = orderData.products
+        const cancelPro = orderData.products.find((pro) => pro._id.toString() === id)
+        const refund = cancelPro.totalPrice
+        console.log(refund);
 
         for(let i=0 ; i < order.length ; i++) {
           const productId = order[i].productId
           const quantity = order[i].quantity
           await Product.findByIdAndUpdate({ _id : productId } , { $inc : { stock : quantity }})
         }
+        await User.findOneAndUpdate({ _id : req.session.user_id } , { $inc : { wallet : refund }})
         const cancel = await Order.findOneAndUpdate({ _id: orderId, 'products._id': id }, {
             $set: {
                 'products.$.status': 'cancelled',
                 'products.$.cancelReason': reason
             }
         })
-
-        console.log(cancel);
 
         if (cancel) {
             res.json({ success: true  })
@@ -45,6 +48,7 @@ const returnOrder = async (req, res, next) => {
         const reason = req.body.reason
         const id = req.body.crId
         const orderId = req.body.id
+        console.log(req.body);
 
         const orderData = await Order.findOne({ 'products._id' : id })
         const order = orderData.products
@@ -56,6 +60,7 @@ const returnOrder = async (req, res, next) => {
           console.log(quantity);
           await Product.findByIdAndUpdate({ _id : productId } , { $inc : { stock : quantity }})
         }
+        await User.findOneAndUpdate({ _id : req.session.user_id } , { $inc : { wallet : refund }})
         const cancel = await Order.findOneAndUpdate({ _id : orderId , 'products._id': id }, {
             $set: {
                 'products.$.status': 'returned',

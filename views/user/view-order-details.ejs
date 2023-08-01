@@ -221,6 +221,7 @@ function cancelOrder(cartId) {
 
 const cancelReason = document.querySelector('input[name="cancelReason"]:checked').value;
 const id = document.getElementById('orderId').value
+
 console.log(id);
 
     $.ajax({
@@ -255,6 +256,7 @@ console.log(id);
 
 
 function returnOrder(cartId) {
+    console.log(proId);
 
 const returnReason = document.querySelector('input[name="returnReason"]:checked').value;
 const id = document.getElementById('orderId').value
@@ -264,7 +266,8 @@ $.ajax({
     method: 'post',
     data: {
         crId: cartId,
-        reason: returnReason
+        reason: returnReason,
+        id
     },
     success: (response) => {
         if (response.success) {

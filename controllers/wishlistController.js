@@ -89,7 +89,7 @@ const addToCart = async (req, res, next) => {
             if(cartData) {
                 res.json({ success : true })
             }else{
-                res.json({ success : false , message : 'Something fuked' })
+                res.json({ success : false , message : 'Something went wrong' })
             }
         }
 

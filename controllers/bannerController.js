@@ -46,7 +46,9 @@ const addBanner = async (req , res , next) => {
 const loadEditBanner = async (req , res , next) => {
     try {
 
-        res.render('addBanner')
+        const id = req.query.id
+        const banner = await Banner.findOne({ _id : id })
+        res.render('editBanner', { banner })
         
     } catch (err) {
         next(err.message)
@@ -56,7 +58,42 @@ const loadEditBanner = async (req , res , next) => {
 const editBanner = async (req , res , next) => {
     try {
 
-        res.render('addBanner')
+        const id = req.body.id
+        const { info , title , description } = req.body
+        
+        if(req.file && req.file.filename) {
+            const image = req.file.filename
+            await Banner.findOneAndUpdate({ _id : id },{
+                $set:{
+                    image : image,
+                    info : info,
+                    description : description,
+                    title : title
+                }
+            })
+        }else{
+            await Banner.findOneAndUpdate({ _id : id },{
+                $set:{
+                    info : info,
+                    description : description,
+                    title : title
+                }
+            })
+        }
+
+        res.redirect('/admin/banner')
+        
+    } catch (err) {
+        next(err.message)
+    }
+}
+
+const deleteBanner = async (req , res , next) => {
+    try {
+
+        const id = req.query.id
+        await Banner.findOneAndDelete({ _id : id })
+        res.redirect('/admin/banner')
         
     } catch (err) {
         next(err.message)
@@ -68,5 +105,6 @@ module.exports = {
     loadAddBanner,
     addBanner,
     loadEditBanner,
-    editBanner
+    editBanner,
+    deleteBanner
 }

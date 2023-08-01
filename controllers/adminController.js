@@ -1,11 +1,46 @@
 const User = require('../models/userModel')
 const bcrypt = require('bcrypt')
+const Order = require('../models/orderModel')           
 
 
 const loadDashboard = async (req , res) => {
     try {
 
-        res.render('dashboard')
+        const users = await User.find({ is_admin: 0 }).sort({ _id: -1 }).limit(5);
+        const totalAmount = await Order.aggregate([
+            { $unwind: '$products' },
+            { $match: { 'products.status' : 'delivered' }},
+            { $group: { _id: null, total: { $sum: '$products.totalPrice' } } },
+            { $project: { total: 1, _id: 0 } },
+          ]);
+        const totalOrders = await Order.find({ status : 'placed' }).countDocuments()  
+        const totalSold = await Order.aggregate([
+            { $unwind: '$products' },
+            { $match: { 'products.status' : 'delivered' }},
+            { $group: { _id: null, total: { $sum: '$products.quantity' } } },
+            { $project: { total: 1, _id: 0 } },
+          ]);
+        const totalPending = await Order.find({status : 'pending'}).countDocuments()
+        const paymentCod = await Order.aggregate([
+            { $match : { payment : 'cod' , 'products.status' : 'delivered' }},
+            { $group : { _id : null , total : {$sum : '$totalAmount' }}},
+            { $project : { total : 1 , _id : 0 }}
+        ])
+        const paymentRazor = await Order.aggregate([
+            { $match : { payment : 'razor' , 'products.status' : 'delivered' }},
+            { $group : { _id : null , total : {$sum : '$totalAmount' }}},
+            { $project : { total : 1 , _id : 0 }}
+        ])
+        console.log(paymentRazor);
+        res.render('dashboard' , {
+            users,
+            totalAmount,
+            totalOrders,
+            totalSold,
+            totalPending,
+            paymentCod,
+            paymentRazor
+        })
         
     } catch (err) {
         console.log(err.message);

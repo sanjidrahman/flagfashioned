@@ -79,6 +79,9 @@
                                         Address</a>
                                 </li>
                                 <li class="list-group-item">
+                                    <a href="#" class="text-decoration-none" onclick="toggleWallet()">Wallet</a>
+                                </li>
+                                <li class="list-group-item">
                                     <a href="/logout" class="btn btn-primary ml-3">Logout</a>
                                 </li>
                             </ul>
@@ -214,6 +217,25 @@
                         </div>
                     </div>
 
+                    <div class="card mb-4" id="walletDetails" style="display: none">
+                        <h5>User Wallet Balance</h5>
+                        <strong>Current Balance: ₹ <%= user.wallet %></strong>
+                
+                        <h5>Wallet History</h5>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                
+                            </tbody>
+                        </table>
+                    </div>
+
                     <div class="card mb-4" id="orderDetails" style="display: none">
                         <div class="card-body">
                             <h5 class="card-title">Order Details</h5>
@@ -279,10 +301,11 @@
             var profileForm = document.getElementById("profileForm");
             var userDetails = document.getElementById("userDetails");
             var addressDetails = document.getElementById("addressDetails");
-
+            var walletDetails = document.getElementById("walletDetails");
             if (profileForm.style.display === "none") {
                 profileForm.style.display = "block";
                 userDetails.style.display = "none";
+                walletDetails.style.display = "none";
                 addressDetails.style.display = "none";
                 orderDetails.style.display = "none";
             } else {
@@ -295,8 +318,10 @@
             var userDetails = document.getElementById("userDetails");
             var addressDetails = document.getElementById("addressDetails");
             var profileForm = document.getElementById("profileForm");
+            var walletDetails = document.getElementById("walletDetails");
             if (addressDetails.style.display === "none") {
                 addressDetails.style.display = "block";
+                walletDetails.style.display = "none";
                 userDetails.style.display = "none";
                 profileForm.style.display = "none";
                 orderDetails.style.display = "none";
@@ -311,13 +336,33 @@
             var userDetails = document.getElementById("userDetails");
             var addressDetails = document.getElementById("addressDetails");
             var profileForm = document.getElementById("profileForm");
+            var walletDetails = document.getElementById("walletDetails");
             if (orderDetails.style.display === "none") {
                 orderDetails.style.display = "block";
+                walletDetails.style.display = "none";
                 userDetails.style.display = "none";
                 profileForm.style.display = "none";
                 addressDetails.style.display = "none";
             } else {
                 orderDetails.style.display = "none";
+                userDetails.style.display = "block";
+            }
+        }
+
+        function toggleWallet() {
+            var orderDetails = document.getElementById('orderDetails')
+            var userDetails = document.getElementById("userDetails");
+            var addressDetails = document.getElementById("addressDetails");
+            var profileForm = document.getElementById("profileForm");
+            var walletDetails = document.getElementById("walletDetails");
+            if (walletDetails.style.display === "none") {
+                walletDetails.style.display = "block";
+                orderDetails.style.display = "none";
+                userDetails.style.display = "none";
+                profileForm.style.display = "none";
+                addressDetails.style.display = "none";
+            } else {
+                walletDetails.style.display = "none";
                 userDetails.style.display = "block";
             }
         }

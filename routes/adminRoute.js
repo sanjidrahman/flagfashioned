@@ -61,7 +61,9 @@ admin_route.get('/banner' , auth.isLogin , bannerController.loadBanner)
 admin_route.get('/add-banner' , auth.isLogin , bannerController.loadAddBanner)
 admin_route.post('/add-banner' , auth.isLogin , upload.upload.single('image') , bannerController.addBanner)
 admin_route.get('/edit-banner' , auth.isLogin , bannerController.loadEditBanner)
-admin_route.post('/add-banner' , auth.isLogin , bannerController.editBanner)
+admin_route.post('/edit-banner' , auth.isLogin , upload.upload.single('image') , bannerController.editBanner)
+admin_route.get('/delete' , auth.isLogin , bannerController.deleteBanner)
+admin_route.post('/delete' , auth.isLogin , bannerController.deleteBanner)
 
 
 

@@ -22,6 +22,153 @@
             --zoom: 3;
             cursor: pointer;
         }
+
+        /* Style for the product reviews section */
+.product-reviews {
+  padding: 50px 0;
+}
+
+/* Style for the existing reviews list */
+.existing-reviews ul {
+  list-style: none;
+  padding: 0;
+}
+
+.existing-reviews li {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+}
+
+/* Style for the add review form */
+.add-review-form {
+  margin-top: 30px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f7f7f7;
+}
+
+.add-review-form h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.add-review-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.add-review-form textarea {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  resize: vertical;
+}
+
+.add-review-form button[type="submit"] {
+  margin-top: 10px;
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.add-review-form button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+/* Style for the rating display */
+.existing-reviews .rating {
+  color: #f1c40f;
+}
+
+/* Style for the heart icon */
+.product__details__btns__option i {
+  margin-right: 5px;
+  color: #ff4b4b;
+}
+
+/* Style for the breadcrumb */
+.product__details__breadcrumb {
+  margin-bottom: 20px;
+}
+
+.product__details__breadcrumb a {
+  color: #050506;
+  text-decoration: none;
+}
+
+.product__details__breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.product__details__breadcrumb span {
+  color: #555;
+}
+
+/* Style for the guaranteed safe checkout section */
+.product__details__last__option h5 {
+  font-size: 14px;
+  color: #888;
+}
+
+.product__details__last__option img {
+  max-width: 100%;
+}
+
+/* Additional adjustments */
+.product__details__text h4 {
+  margin-bottom: 15px;
+}
+
+.product__details__text h3 {
+  font-size: 26px;
+  margin-bottom: 15px;
+}
+
+.product__details__text p {
+  margin-bottom: 15px;
+}
+
+.product__details__option {
+  margin-bottom: 15px;
+}
+
+.product__details__option__size span,
+.product__details__option__color span {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.product__details__option__size label,
+.product__details__option__color label {
+  margin-right: 10px;
+}
+
+.product__details__cart__option {
+  margin-top: 20px;
+}
+
+/* Adjust quantity input width */
+.quantity input {
+  width: 60px;
+}
+
+/* Adjust heart icon color */
+.product__details__btns__option i.fa-heart {
+  color: #ff4b4b;
+}
+
+/* Adjust breadcrumb spacing */
+.product__details__breadcrumb {
+  margin-bottom: 10px;
+}
+
     </style>
 
     <form action="/addToCart" method="POST">
@@ -159,6 +306,46 @@
             </div>
         </section>
     </form>
+
+
+    <section class="product-reviews">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+              <h2>Product Reviews</h2>
+      
+              <div class="existing-reviews">
+                <% if (products[0].review.length === 0) { %>
+                  <p>No reviews yet.</p>
+                <% } else { %>
+                  <ul id="reviewList">
+                    <!-- Existing reviews will be dynamically added here using JavaScript -->
+                    <% for (let review of products[0].review) { %>
+                    <li>
+                      <strong>Username : </strong><%= review.user.name %><br>
+                      <strong>Review : </strong><%= review.review %>
+                    </li>
+                    <% } %>
+                  </ul>
+                <% } %>
+              </div>
+      
+              <div class="add-review-form">
+                <h3>Add Your Review</h3>
+                <form id="reviewForm" action="/review" method="post">
+                  <label for="comment">Comment:</label>
+                  <textarea name="review" rows="2" required></textarea>
+                  <input type="hidden" name="id" value="<%= products[0]._id %>">
+      
+                  <button type="submit">Submit Review</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      
     
 
 

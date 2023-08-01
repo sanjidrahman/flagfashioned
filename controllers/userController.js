@@ -6,6 +6,7 @@ const Cart = require('../models/cartModel')
 const Order = require('../models/orderModel')
 const Wishlist = require('../models/wishlistModel')
 const Coupon = require('../models/couponModel')
+const Banner = require('../models/bannerModel')
 const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
 
@@ -62,8 +63,9 @@ const sendVerifyMail = async (name, email, otp) => {
 const loadHome = async (req, res) => {
     try {
 
+        const banners = await Banner.find({})
         const product = await Product.find({ is_delete: 0 })
-        res.render('home', { products: product, session: req.session.user_id })
+        res.render('home', { products: product, session: req.session.user_id , banners })
 
     } catch (err) {
         console.log(err.message);
@@ -222,7 +224,7 @@ const resend = async (req, res) => {
 
         sendVerifyMail(userName, userEmail, otp)
         res.render('otp-page')
-
+                    
     } catch (err) {
         console.log(err.message);
     }
@@ -266,7 +268,7 @@ const loadShopDetails = async (req, res) => {
     try {
 
         const id = req.query.id
-        const product = await Product.find({ _id: id })
+        const product = await Product.find({ _id: id }).populate('review.user')
         res.render('shop-details', { products: product, session: req.session.user_id })
 
     } catch (err) {
@@ -278,7 +280,6 @@ const loadProifle = async (req, res) => {
     try {
 
         const orders = await Order.find({ user: req.session.user_id, status: 'placed' }).populate('products.productId').sort({ date: -1 })
-
         const address = await Address.findOne({ user: req.session.user_id })
         const users = await User.findOne({ _id: req.session.user_id })
 
@@ -364,12 +365,20 @@ const loadCheckOut = async (req, res, next) => {
                 } else {
                     if (new Date() <= couponData.expireDate) {
                         if (total >= couponData.minimum) {
-                            total = total - (couponData.discountPercentage / 100) * total;
+                            const percentage = (couponData.discountPercentage/100)
+                            console.log(percentage);
+                            const discountedProducts = cartData.products.map((product) => ({
+                                ...product.toObject(),
+                                totalPrice: Math.floor(product.price * product.quantity - product.price * product.quantity * percentage)
+                            })); 
+                            
+                            let minus = Math.floor((couponData.discountPercentage / 100) * total) 
+                            total = Math.floor(grandTotal - minus)
 
                             return res.render('checkout', {
                                 session: req.session.user_id,
                                 addresses: address,
-                                cart: cartData,
+                                cart: { ...cartData.toObject(), products: discountedProducts }, // Override the original products with the discounted products
                                 total: total,
                                 grandTotal,
                                 couponData,
@@ -395,6 +404,8 @@ const loadCheckOut = async (req, res, next) => {
                 coupons,
                 coupon: req.query.coupon
             })
+        }else{
+            return res.redirect('/checkout')
         }
 
     } catch (err) {
@@ -454,6 +465,25 @@ const logout = async (req, res, next) => {
     }
 }
 
+const review = async(req , res , next) => {
+    try {
+
+        const id = req.body.id
+        console.log(id);
+        const {review } = req.body
+        const newReview = {
+            user: req.session.user_id,
+            review: review,
+          };
+        await Product.findOneAndUpdate({ _id : id } , { $push : {review : newReview }})
+
+        res.redirect(`/shop-details?id=${id}`)
+
+    } catch (err) {
+        next(err.message)
+    }
+}
+
 
 
 module.exports = {
@@ -475,5 +505,6 @@ module.exports = {
     loadCheckOut,
     loadOrderPlaced,
     loadOrderDetails,
-    loadWishlist
+    loadWishlist,
+    review
 }

@@ -36,6 +36,7 @@ user_route.get('/order-placed/:id' , userController.loadOrderPlaced)
 user_route.get('/order-details/:id' , auth.isLogin , auth.isBlock , userController.loadOrderDetails)
 user_route.get('/wishlist' , auth.isLogin , auth.isBlock , userController.loadWishlist)
 user_route.get('/logout' , userController.logout)
+user_route.post('/review' , userController.review)
 
 
 user_route.post('/deleteAddress' , addressController.deleteAddress)
@@ -68,6 +69,8 @@ user_route.post('/return-order' , orderController.returnOrder)
 user_route.post('/addToWish' , wishlistController.addWishlist)
 user_route.post('/wish-cart' , wishlistController.addToCart)
 user_route.post('/wish-delete' , wishlistController.deleteWishlist)
+
+
 
 
 

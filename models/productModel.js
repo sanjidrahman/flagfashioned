@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb')
 const mongoose = require('mongoose')
 
 const productSchema = new mongoose.Schema({
@@ -35,7 +36,18 @@ const productSchema = new mongoose.Schema({
     is_delete : {
         type : Number,
         default : 0
-    }
+    },
+
+    review : [{
+        user : {
+            type : ObjectId,
+            ref : 'User'
+        },
+
+        review : {
+            type : 'String'
+        }
+    }]
 })
 
 module.exports = mongoose.model('product' , productSchema)
