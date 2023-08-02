@@ -81,6 +81,10 @@ const orderSchema = new mongoose.Schema({
 
         returnReason : {
             type : String
+        },
+
+        deliveryDate : {
+            type : Date
         }
 
     }]

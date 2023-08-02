@@ -81,46 +81,52 @@
   </style>
 
 <div class="container">
-  <% if (totalOrders && totalAmount && totalSold && product && totalOrders.length > 0 && totalAmount.length > 0 && totalSold.length > 0 && product.length > 0) { %>
+  <% if ( totalAmount && totalSold && totalAmount.length > 0 && totalSold.length > 0 && product.length > 0) { %>
     <div class="card" style="margin-top: 70px;">
-      <h2>Total Orders: <%= totalOrders[0].total %></h2>
       <h2>Total Amount Generated: <%= totalAmount[0].total %></h2>
       <h2>Total Product Sold Quantity: <%= totalSold[0].total %></h2>
     </div>
-    <!-- <button type="button" onclick="printDiv('printThisDiv')" class="btn btn-primary mt-3">Print</button> -->
     <div class="table-container">
-      <form action="/admin/sales-report" method="post">
         <div class="sort-container mb-3">
           <label for="from-date">From Date:</label>
           <input type="date" id="from-date" name="fromDate" required>
           <label for="to-date">To Date:</label>
           <input type="date" id="to-date" name="toDate" required>
-          <button class="button" type="submit" id="get-report-btn" style="background-color: #558157; color: white; border: none; padding: 4px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; cursor: pointer; border-radius: 4px;">Get Report</button>
+          <button class="button" type="button" onclick="sort()" id="get-report-btn" style="background-color: #558157; color: white; border: none; padding: 4px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; cursor: pointer; border-radius: 4px;">Get Report</button>
         </div>
-       
-      </form>  
     </div>
-      <div >    
-      <table id="example">
-        <thead>
-          <tr>
-            <th>Product Image</th>
-            <th>Product Name</th>
-            <th>Total Sold</th>
-            <th>Amount Generated</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% product.forEach((item) => { %>
+      <div id="reloadDiv">    
+        <table id="example">
+          <thead>
             <tr>
-              <td><img style="width: 50px; height: 50px;" src="/adminassets/productImages/<%= item.productImage %>" alt="<%= item.productName %>"></td>
-              <td><%= item.productName %></td>
-              <td><%= item.totalQuantitySold %></td>
-              <td>₹ <%= item.totalRevenueGenerated.toFixed(2) %></td>
+              <th>Product Name</th>
+              <th>Product Image</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Total Price</th>
+              <th>User Name</th>
+              <th>Delivery Date</th>
             </tr>
-          <% }) %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% product.forEach((order) => { %>
+              <% order.products.forEach((product) => { %>
+                <% if (product.status === 'delivered') { %>
+                  <tr>
+                    <td><%= product.productId.name %></td>
+                    <td><img src="/adminassets/productImages/<%= product.productId.image[0] %>" style="width: 50px; height: 50px;" alt="<%= product.productId.name %>"></td>
+                    <td><%= product.quantity %></td>
+                    <td><%= product.price %></td>
+                    <td><%= product.totalPrice %></td>
+                    <td><%= order.user.name %></td>
+                    <td><%= product.deliveryDate.toLocaleDateString('en-US', { year: 'numeric' ,
+                      month: 'short' , day: '2-digit' }).replace(/\//g,'-') %></td>
+                  </tr>
+                  <% } %>
+              <% }) %>
+            <% }) %>
+          </tbody>
+        </table>        
   <% } else { %>
     <h2 style="margin-top: 100px;">No data available.</h2>
   <% } %>
@@ -130,7 +136,7 @@
   .dt-button.buttons-excel,
   .dt-button.buttons-csv,
   .dt-button.buttons-pdf {
-    background-color: #25cf0b;
+    background-color: #558157;
     /* Change background color */
     color: white;
     /* Change text color */
@@ -149,7 +155,7 @@
 <style>
   .dt-button.buttons-copy,
   .dt-button.buttons-print {
-    background-color: #0e47d8;
+    background-color: #030712;
     color: white;
     border-radius: 5px;
     border: none;
@@ -169,7 +175,30 @@
     });
   });
 
-  
+  function sort() {
+    const fromDate = document.getElementById('from-date').value
+    const toDate = document.getElementById('to-date').value
+    console.log(fromDate + ',' + toDate);
+    $.ajax({
+      url:'/admin/sales-report',
+      method:'post',
+      data:{
+        fromDate,
+        toDate
+      },
+      success : (response) => {
+        if(response.success) {
+          $('#reloadDiv').load('/sales-report #reloadDiv')
+        }else{
+          Swal.fire({
+            icon : 'error',
+            title : 'hi daaa'
+          })
+        }
+      }
+    })
+  }
+
 </script>
 
 

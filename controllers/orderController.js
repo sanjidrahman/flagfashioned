@@ -48,11 +48,12 @@ const returnOrder = async (req, res, next) => {
         const reason = req.body.reason
         const id = req.body.crId
         const orderId = req.body.id
-        console.log(req.body);
 
         const orderData = await Order.findOne({ 'products._id' : id })
         const order = orderData.products
-        console.log(order);
+        const cancelPro = orderData.products.find((pro) => pro._id.toString() === id)
+        const refund = cancelPro.totalPrice
+        console.log(refund);
 
         for(let i=0 ; i < order.length ; i++) {
           const productId = order[i].productId
@@ -131,13 +132,18 @@ const update = async (req, res, next) => {
         const orderId = req.body.oid
         const status = req.body.status
 
-        const orderData = await Order.findOneAndUpdate({ _id: orderId, 'products._id': productId },
-            {
-                $set:
-                {
-                    'products.$.status': status
-                }
-            })
+        if(status === 'delivered') {
+          const orderData = await Order.findOneAndUpdate({ _id: orderId, 'products._id': productId },
+          { $set: { 
+            'products.$.status': status,
+            'products.$.deliveryDate' : new Date()
+           }})
+        }else{
+          const orderData = await Order.findOneAndUpdate({ _id: orderId, 'products._id': productId },
+          { $set: { 
+            'products.$.status': status
+           }})
+        }
 
         res.redirect(`/admin/order-detail?id=${orderId}`)
 
@@ -148,19 +154,6 @@ const update = async (req, res, next) => {
 
 const salesReport = async (req, res, next) => {
     try {
-
-        var page = 1
-        if(req.query.page) {
-            page = req.query.page
-        }
-
-        var limit = page == 1 ? 3 : 6
-
-        const totalOrders = await Order.aggregate([
-            { $unwind: '$products' },
-            { $match: {'products.status': 'delivered'}},
-            { $group: { _id: null, total: { $sum: 1 }}}
-          ]);
 
         const totalAmount = await Order.aggregate([
             { $unwind: '$products' },
@@ -176,41 +169,12 @@ const salesReport = async (req, res, next) => {
         ]);
 
 
-        const product = await Order.aggregate([
-            { $unwind: "$products" },
-            { $match : { 'products.status' : 'delivered' }},
-            { $group: { _id: "$products.productId",
-              totalQuantitySold: { $sum: "$products.quantity" },
-              totalRevenueGenerated: { $sum: "$products.totalPrice" }
-            }},
-            { $lookup: { from: "products", localField: "_id", foreignField: "_id", as: "productData"}},
-            { $unwind: "$productData" },
-            { $project: { productName: "$productData.name",  productImage: { $arrayElemAt: ["$productData.image", 0] } , totalQuantitySold: 1, totalRevenueGenerated: 1 }}
-          ])
-          .limit(limit * 1)
-          .skip((page -1) * limit)
-          .exec()
-
-          const result = await Order.aggregate([
-            { $unwind: "$products" },
-            { $match : { 'products.status' : 'delivered' }},
-            { $group: { _id: "$products.productId",
-              totalQuantitySold: { $sum: "$products.quantity" },
-              totalRevenueGenerated: { $sum: "$products.totalPrice" }
-            }},
-            { $lookup: { from: "products", localField: "_id", foreignField: "_id", as: "productData"}},
-            { $unwind: "$productData" },
-            { $project: { productName: "$productData.name",  productImage: { $arrayElemAt: ["$productData.image", 0] } , totalQuantitySold: 1, totalRevenueGenerated: 1 }}
-          ])
-
-          const count = result.length
+        const product = await Order.find({ "products.status" : 'delivered' }).populate('products.productId').populate('user')
 
         res.render('sales-report' , { 
-            totalOrders,
             totalAmount, 
             totalSold, 
             product,
-            totalPages : Math.ceil( count / limit )
          })
 
 
@@ -252,28 +216,18 @@ const sortSalesReport = async (req, res, next) => {
 
 
       console.log(fromDate)
-      console.log(toDate)
+      console.log(toDate+'l><><><><')
   
       var matchStage = {
         'products.status': 'delivered',
-        createdAt : { $gte: fromDate, $lte: toDate },
+        'products.deliveryDate' : { $gte: fromDate, $lte: toDate },
       };
-  
-      const totalOrders = await Order.aggregate([
-        { $unwind: '$products' },
-        { $match: matchStage },
-        { $group: { _id: null, total: { $sum: 1 } } },
-      ]);
-
-      console.log(totalOrders);
   
       const totalAmount = await Order.aggregate([
         { $unwind: '$products' },
         { $match: matchStage },
         { $group: { _id: null, total: { $sum: '$products.totalPrice' } } },
       ]);
-
-      console.log(totalAmount);
 
       const totalSold = await Order.aggregate([
         { $unwind: '$products' },
@@ -282,50 +236,13 @@ const sortSalesReport = async (req, res, next) => {
         { $project: { total: 1, _id: 0 } },
       ]);
 
-      console.log(totalSold);
+      const product = await Order.find({ "products.status" : 'delivered' }).populate('products.productId').populate('user')
 
-      const product = await Order.aggregate([
-        { $unwind: '$products' },
-        { $match: matchStage },
-        { $group: {
-            _id: '$products.productId',
-            totalQuantitySold: { $sum: '$products.quantity' },
-            totalRevenueGenerated: { $sum: '$products.totalPrice' },
-          },
-        },
-        { $lookup: { from: 'products', localField: '_id', foreignField: '_id', as: 'productData' } },
-        { $unwind: '$productData' },
-        { $project: { productName: '$productData.name', productImage: { $arrayElemAt: ['$productData.image', 0] }, totalQuantitySold: 1, totalRevenueGenerated: 1 } },
-      ]).limit(limit * 1).skip((page - 1) * limit).exec();
-
-      console.log(product);
-
-  
-      const result = await Order.aggregate([
-        { $unwind: '$products' },
-        { $match: matchStage },
-        { $group: {
-            _id: '$products.productId',
-            totalQuantitySold: { $sum: '$products.quantity' },
-            totalRevenueGenerated: { $sum: '$products.totalPrice' },
-          },
-        },
-        { $lookup: { from: 'products', localField: '_id', foreignField: '_id', as: 'productData' } },
-        { $unwind: '$productData' },
-        { $project: { productName: '$productData.name', productImage: { $arrayElemAt: ['$productData.image', 0] }, totalQuantitySold: 1, totalRevenueGenerated: 1 } },
-      ]);
-  
+      const result = await Order.find({ "products.status" : 'delivered' }).populate('products.productId').populate('user')
       const count = result.length;
   
-      res.render('sales-report', { 
-        totalOrders,
-        totalAmount,
-        totalSold,
-        product,
-        totalPages: Math.ceil(count / limit),
-        fromDate,
-        toDate,
-      });
+      res.json({ success : true })
+
     } catch (err) {
       next(err.message);
     }
