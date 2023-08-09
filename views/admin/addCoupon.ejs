@@ -75,16 +75,33 @@
       if (startDateInput.value.trim() === '') {
         startDateError.textContent = 'Start Date is required';
         isValid = false;
+      } else {
+        const startDate = new Date(startDateInput.value);
+        const currentDate = new Date();
+        if (startDate < currentDate) {
+          startDateError.textContent = 'Start Date cannot be before the current date';
+          isValid = false;
+        }
       }
   
       if (expiryDateInput.value.trim() === '') {
-        expiryDateError.textContent = 'Expiry Date is required';
+        expiryDateInput.textContent = 'Start Date is required';
         isValid = false;
+      } else {
+        const startDate = startDateInput.value
+        console.log(startDate);
+        const expireDate = new Date(expiryDateInput.value);
+        const currentDate = new Date();
+        if (expireDate < startDate) {
+          expiryDateError.textContent = 'Expire Date cannot be before the start date';
+          isValid = false;
+        }
       }
   
       return isValid;
     }
   </script>
+  
   
 
 <%- include("../admin/layouts/adminFooter.ejs") %>

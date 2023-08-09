@@ -23,16 +23,18 @@ const cancelOrder = async (req, res, next) => {
           const quantity = order[i].quantity
           await Product.findByIdAndUpdate({ _id : productId } , { $inc : { stock : quantity }})
         }
-        await User.findOneAndUpdate({ _id : req.session.user_id } , { $inc : { wallet : refund }})
+        if(orderData.payment === 'razor') {
+            await User.findOneAndUpdate({ _id : req.session.user_id } , { $inc : { wallet : refund }})
+        }
         const cancel = await Order.findOneAndUpdate({ _id: orderId, 'products._id': id }, {
             $set: {
                 'products.$.status': 'cancelled',
                 'products.$.cancelReason': reason
             }
         })
-
+       
         if (cancel) {
-            res.json({ success: true  })
+            res.json({ success: true })
         } else {
             res.json({ success: false })
         }
@@ -58,7 +60,6 @@ const returnOrder = async (req, res, next) => {
         for(let i=0 ; i < order.length ; i++) {
           const productId = order[i].productId
           const quantity = order[i].quantity
-          console.log(quantity);
           await Product.findByIdAndUpdate({ _id : productId } , { $inc : { stock : quantity }})
         }
         await User.findOneAndUpdate({ _id : req.session.user_id } , { $inc : { wallet : refund }})
@@ -169,12 +170,32 @@ const salesReport = async (req, res, next) => {
         ]);
 
 
-        const product = await Order.find({ "products.status" : 'delivered' }).populate('products.productId').populate('user')
-
+        const product = await Order.aggregate([
+            { $match: { 'products.status': 'delivered' }},
+            { $unwind: '$products' },
+            { $match: { 'products.status': 'delivered' }},
+            { $lookup: {
+                from: 'products', 
+                localField: 'products.productId',
+                foreignField: '_id',
+                as: 'products.productData',
+              },
+            },
+            { $unwind: '$products.productData' },
+            { $lookup: {
+                from: 'users',
+                localField: 'user',
+                foreignField: '_id',
+                as: 'userDetails',
+              },
+            },
+            { $unwind: '$userDetails' },
+          ]);
+          
         res.render('sales-report' , { 
             totalAmount, 
             totalSold, 
-            product,
+            product
          })
 
 
@@ -185,14 +206,6 @@ const salesReport = async (req, res, next) => {
 
 const sortSalesReport = async (req, res, next) => {
     try {
-
-        var page = 1
-        if(req.query.page) {
-            page = req.query.page
-        }
-
-        var limit = page == 1 ? 3 : 6
-        
         
       let fromDate = req.body.fromDate ? new Date(req.body.fromDate) : null;
       fromDate.setHours(0, 0, 0, 0);
@@ -201,7 +214,6 @@ const sortSalesReport = async (req, res, next) => {
 
       const currentDate = new Date();
 
-  
       if (fromDate && toDate) {
         if (toDate < fromDate) {
           const temp = fromDate;
@@ -214,10 +226,6 @@ const sortSalesReport = async (req, res, next) => {
         fromDate = currentDate;
       }
 
-
-      console.log(fromDate)
-      console.log(toDate+'l><><><><')
-  
       var matchStage = {
         'products.status': 'delivered',
         'products.deliveryDate' : { $gte: fromDate, $lte: toDate },
@@ -236,17 +244,96 @@ const sortSalesReport = async (req, res, next) => {
         { $project: { total: 1, _id: 0 } },
       ]);
 
-      const product = await Order.find({ "products.status" : 'delivered' }).populate('products.productId').populate('user')
+      const product = await Order.aggregate([
+        { $match: matchStage },
+        { $unwind: '$products' },
+        { $match: { 'products.status': 'delivered' }},
+        { $lookup: {
+            from: 'products', 
+            localField: 'products.productId',
+            foreignField: '_id',
+            as: 'products.productData',
+          },
+        },
+        { $unwind: '$products.productData' },
+        { $lookup: {
+            from: 'users',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'userDetails',
+          },
+        },
+        { $unwind: '$userDetails' },
+      ]);
 
-      const result = await Order.find({ "products.status" : 'delivered' }).populate('products.productId').populate('user')
-      const count = result.length;
-  
-      res.json({ success : true })
-
+      res.render('sales-report', { 
+        totalAmount,
+        totalSold,
+        product
+      });
     } catch (err) {
       next(err.message);
     }
   };
+
+  const sort = async (req , res , next) => {
+    try {
+
+        const range = req.body.dateRange
+        console.log(range);
+        const fromDate = new Date();
+        const toDate = new Date(fromDate.getTime() - range * 24 * 60 * 60 * 1000);
+
+        var matchStage = {
+            'products.status': 'delivered',
+            'products.deliveryDate' : { $gte: toDate, $lte: fromDate },
+          };
+      
+          const totalAmount = await Order.aggregate([
+            { $unwind: '$products' },
+            { $match: matchStage },
+            { $group: { _id: null, total: { $sum: '$products.totalPrice' } } },
+          ]);
+    
+          const totalSold = await Order.aggregate([
+            { $unwind: '$products' },
+            { $match: matchStage },
+            { $group: { _id: null, total: { $sum: '$products.quantity' } } },
+            { $project: { total: 1, _id: 0 } },
+          ]);
+    
+          const product = await Order.aggregate([
+            { $match: matchStage },
+            { $unwind: '$products' },
+            { $match: { 'products.status': 'delivered' }},
+            { $lookup: {
+                from: 'products', 
+                localField: 'products.productId',
+                foreignField: '_id',
+                as: 'products.productData',
+              },
+            },
+            { $unwind: '$products.productData' },
+            { $lookup: {
+                from: 'users',
+                localField: 'user',
+                foreignField: '_id',
+                as: 'userDetails',
+              },
+            },
+            { $unwind: '$userDetails' },
+          ]);
+    
+          res.render('sales-report', { 
+            totalAmount,
+            totalSold,
+            product
+          });
+        
+    } catch (err) {
+        next(err.message)
+    }
+  }
   
 
 module.exports = {
@@ -256,5 +343,6 @@ module.exports = {
     orderDetails,
     update,
     salesReport,
-    sortSalesReport
+    sortSalesReport,
+    sort
 }

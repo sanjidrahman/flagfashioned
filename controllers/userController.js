@@ -9,6 +9,10 @@ const Coupon = require('../models/couponModel')
 const Banner = require('../models/bannerModel')
 const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
+const fs = require('fs')
+const ejs = require('ejs')
+const puppeteer = require('puppeteer')
+const path = require('path')
 
 
 let otp;
@@ -63,9 +67,14 @@ const sendVerifyMail = async (name, email, otp) => {
 const loadHome = async (req, res) => {
     try {
 
+        const count = await Cart.aggregate([
+            { $match : { user : req.session.user_id }},
+            { $project: { count : { $size: "$products" }}}
+          ]);        
+        console.log(count);
         const banners = await Banner.find({})
         const product = await Product.find({ is_delete: 0 })
-        res.render('home', { products: product, session: req.session.user_id , banners })
+        res.render('home', { products: product, session: req.session.user_id, banners , count })
 
     } catch (err) {
         console.log(err.message);
@@ -224,7 +233,7 @@ const resend = async (req, res) => {
 
         sendVerifyMail(userName, userEmail, otp)
         res.render('otp-page')
-                    
+
     } catch (err) {
         console.log(err.message);
     }
@@ -334,7 +343,7 @@ const changePass = async (req, res, next) => {
                 res.render('cpassword', { user: user, message: "new password and confirm password don't match" });
             }
         } else {
-            res.render('cpassword', { user: user, message: "incorrect old password" });
+            res.render('cpassword', { user: user, message: "incorrect old password" , session : req.session.user_id });
         }
     } catch (err) {
         next(err.message);
@@ -345,9 +354,11 @@ const loadCheckOut = async (req, res, next) => {
     try {
         const code = req.query.coupon;
         const couponData = await Coupon.findOne({ code: code });
-        const coupons = await Coupon.find({})
+        const coupons = await Coupon.find({ user: { $nin: [req.session.user_id] }});
         const cartData = await Cart.findOne({ user: req.session.user_id }).populate('products.productId');
         const address = await Address.findOne({ user: req.session.user_id });
+        const user = await User.findOne({ _id: req.session.user_id })
+        const wallet = user.wallet
 
         let total = 0;
         let grandTotal = 0;
@@ -365,14 +376,14 @@ const loadCheckOut = async (req, res, next) => {
                 } else {
                     if (new Date() <= couponData.expireDate) {
                         if (total >= couponData.minimum) {
-                            const percentage = (couponData.discountPercentage/100)
+                            const percentage = (couponData.discountPercentage / 100)
                             console.log(percentage);
                             const discountedProducts = cartData.products.map((product) => ({
                                 ...product.toObject(),
                                 totalPrice: Math.floor(product.price * product.quantity - product.price * product.quantity * percentage)
-                            })); 
-                            
-                            let minus = Math.floor((couponData.discountPercentage / 100) * total) 
+                            }));
+
+                            let minus = Math.floor((couponData.discountPercentage / 100) * total)
                             total = Math.floor(grandTotal - minus)
 
                             return res.render('checkout', {
@@ -383,13 +394,14 @@ const loadCheckOut = async (req, res, next) => {
                                 grandTotal,
                                 couponData,
                                 coupons,
-                                coupon: req.query.coupon
+                                coupon: req.query.coupon,
+                                wallet
                             });
-                        }else{
+                        } else {
                             return res.redirect('/checkout')
                         }
-                    }else{
-                         return res.redirect('/checkout')
+                    } else {
+                        return res.redirect('/checkout')
                     }
                 }
             }
@@ -402,9 +414,10 @@ const loadCheckOut = async (req, res, next) => {
                 grandTotal,
                 couponData,
                 coupons,
-                coupon: req.query.coupon
+                coupon: req.query.coupon,
+                wallet
             })
-        }else{
+        } else {
             return res.redirect('/checkout')
         }
 
@@ -465,17 +478,17 @@ const logout = async (req, res, next) => {
     }
 }
 
-const review = async(req , res , next) => {
+const review = async (req, res, next) => {
     try {
 
         const id = req.body.id
         console.log(id);
-        const {review } = req.body
+        const { review } = req.body
         const newReview = {
             user: req.session.user_id,
             review: review,
-          };
-        await Product.findOneAndUpdate({ _id : id } , { $push : {review : newReview }})
+        };
+        await Product.findOneAndUpdate({ _id: id }, { $push: { review: newReview } })
 
         res.redirect(`/shop-details?id=${id}`)
 
@@ -483,6 +496,58 @@ const review = async(req , res , next) => {
         next(err.message)
     }
 }
+
+const deleteReview = async (req , res , next) => {
+    try {
+
+        const id = req.body.reviewId
+        console.log(id);
+        const proId = req.body.productId
+        console.log(proId);
+        const updated = await Product.findOneAndUpdate({ _id : proId } , { $pull : { review : { _id : id }}})
+        if(updated) {
+            res.json({ success : true , query : proId })
+        }
+        
+    } catch (err) {
+        next(err.message)
+    }
+}
+
+const loadInvoice = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const userData = await User.findOne({ _id: req.session.user_id })
+        const orderData = await Order.findOne({ _id: id }).populate('products.productId');
+        const date = new Date()
+
+
+        data = {
+            order: orderData,
+            user: userData,
+            date,
+        }
+
+        const filepathName = path.resolve(__dirname, '../views/user/invoice.ejs');
+        const html = fs.readFileSync(filepathName).toString();
+        const ejsData = ejs.render(html, data);
+
+        const browser = await puppeteer.launch({ headless: 'new' });
+        const page = await browser.newPage();
+        await page.setContent(ejsData, { waitUntil: 'networkidle0' });
+        const pdfBytes = await page.pdf({ format: 'Letter' });
+        await browser.close();
+
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename= order invoice.pdf');
+        res.send(pdfBytes);
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).send('An error occurred');
+    }
+};
 
 
 
@@ -506,5 +571,7 @@ module.exports = {
     loadOrderPlaced,
     loadOrderDetails,
     loadWishlist,
-    review
+    review,
+    loadInvoice,
+    deleteReview
 }

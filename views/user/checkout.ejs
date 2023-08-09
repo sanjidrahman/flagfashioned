@@ -94,6 +94,7 @@
                                             </td>
                                             <td class="cart__price">₹ <%= cart.totalPrice %>
                                             </td>
+                                            <input type="hidden" value="<%= cart.totalPrice %>" id="cart_totalPrice">
                                         </tr>
                                         <% }) %>
                                 </tbody>
@@ -189,9 +190,11 @@
                                             <ul>
                                                 <li>Subtotal <span>₹ <%= grandTotal %></span></li>
                                                 <li>Delivery Charges <span>₹ <%= total %></span></li>
-                                                <li>Total <span>₹ <%= total %></span></li>
+                                                <li>Total <span id="totalAmount">₹ <%= total %></span></li>
                                             </ul>
                                             <input type="hidden" name='total' id="total" value="<%= total %>">
+                                            <!-- this is to get correct amount before when its not ckecked -->
+                                            <input type="hidden" name='total1' id="total1" value="<%= total %>">
                                             <hr>
                                             <h6>Select payment method</h6>
                                             <ul>
@@ -200,11 +203,20 @@
                                                         required>
                                                     <label for="paymentMethod1">Cash on delivery</label>
                                                 </li>
-                                                <li>
-                                                    <input type="radio" id="payment" name="payment" value="razor"
-                                                        required>
-                                                    <label for="paymentMethod1">RazorPay</label>
-                                                </li>
+                                                <% if ( wallet> 0 ) { %>
+                                                    <li>
+                                                        <input type="checkbox" onclick="action()" id="payment"
+                                                            name="payment" value="wallet" required>
+                                                        <label for="paymentMethod1">Wallet</label><span id="wallet"
+                                                            style="color: black;">Available Balance : ₹ <%= wallet %>
+                                                                </span>
+                                                    </li>
+                                                    <% } %>
+                                                        <li>
+                                                            <input type="radio" id="payment" name="payment"
+                                                                value="razor" required>
+                                                            <label for="paymentMethod1">RazorPay</label>
+                                                        </li>
                                             </ul>
                                             <button onclick="placeOrder()" type="submit" class="primary-btn">Place
                                                 order</button>
@@ -263,28 +275,56 @@
 
     <script>
 
-  function handleElseCase() {
-    $.ajax({
-      type: "GET",
-      url: "/checkout", // Replace this with the server route that handles the else case
-      success: function (response) {
-        Swal.fire({
-          title: "Else Case Message",
-          text: response.message,
-          icon: "warning",
-        });
-      },
-      error: function (xhr, status, error) {
-        console.error(error);
-        Swal.fire({
-          title: "Error",
-          text: "An error occurred. Please try again later.",
-          icon: "error",
-        });
-      },
-    });
-  }
+        let isChecked = false;
 
+        function action() {
+            const total = document.getElementById('total').value;
+            const wallet = parseInt('<%= wallet %>')
+
+            if (!isChecked) {
+                $.ajax({
+                    type: "post",
+                    url: "/wallet",
+                    data: {
+                        total
+                    },
+                    success: (response) => {
+                        if (response.success) {
+                            const updatedTotal = response.total;
+                            const updateWallet =  wallet - total
+                            $("li > span#totalAmount").text(`₹ ${updatedTotal}`);
+                            $("#total").val(updatedTotal);
+                            $("li > span#wallet").text(`Available Balance : ₹ ${updateWallet}`)
+                            isChecked = !isChecked;
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(error);
+                        Swal.fire({
+                            title: "Error",
+                            text: "An error occurred. Please try again later.",
+                            icon: "error",
+                        });
+                    },
+                });
+            } else {
+                const total = document.getElementById('total1').value
+
+                // // it was first done before updation was held for unchecked box
+                // const currentTotal = parseFloat($("li > span#totalAmount").text().replace("₹ ", ""));
+                // const walletAmount = parseFloat("<%= wallet %>");
+                // const updatedTotal = currentTotal + walletAmount;
+                // console.log(currentTotal);
+                // console.log(walletAmount);
+                // console.log(updatedTotal);
+
+
+                $("li > span#totalAmount").text(`₹ ${total}`);
+                $("#total").val(total);
+                $("li > span#wallet").text(`Available Balance : ₹ ${wallet}`)
+                isChecked = !isChecked;
+            }
+        }
 
 
         function remove() {
@@ -378,7 +418,7 @@
                     selectedAddress: address,
                     payment: payment,
                     total: total,
-                    code,
+                    code
                 },
                 success: (response) => {
                     if (response.success) {
@@ -426,7 +466,6 @@
 
         function verifyPayment(payment, order) {
             const code = document.getElementById('code').value
-            console.log(code);
             $.ajax({
                 url: "/verifypayment",
                 method: 'post',

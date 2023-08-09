@@ -6,18 +6,21 @@
   <div class="row">
     <div class="col-md-6 offset-md-3">
       <h2>Add Product</h2>
-      <form action="/admin/add-product" method="POST" enctype="multipart/form-data">
+      <form action="/admin/add-product" method="POST" id="productForm" enctype="multipart/form-data">
         <div class="mb-3">
           <label for="name" class="form-label">Product Name</label>
           <input type="text" class="form-control" id="name" name="name" style="color: white;" required>
+          <div id="nameError" style="color: red;"></div>
         </div>
         <div class="mb-3">
           <label for="price" class="form-label">Price</label>
           <input type="number" class="form-control" id="price" name="price" style="color: white;" required>
+          <div id="priceError" style="color: red;"></div>
         </div>
         <div class="mb-3">
           <label for="description" class="form-label">Description</label>
           <textarea class="form-control" id="description" name="description" style="color: white;" required></textarea>
+          <div id="descriptionError" style="color: red;"></div>
         </div>
         <div class="mb-3">
           <label for="category" class="form-label">Category</label>
@@ -26,14 +29,17 @@
                 <option value="<%= category.name %>"><%= category.name %></option>
             <% }) %>
           </select>
+          <div id="categoryError" style="color: red;"></div>
         </div>
         <div class="form-group">
           <label class="mt-1">Stock</label>
           <input class="form-control" type="number" id="stock" name="stock" style="color: white;">
+          <div id="stockError" style="color: red;"></div>
         </div>
         <div class="mb-3">
           <label for="image" class="form-label">Product Image</label>
           <input type="file" class="form-control" id="image" name="image" style="color: white;" required multiple>
+          <div id="imageError" style="color: red;"></div>
         </div>
         <div>
             <% if(typeof message !== 'undefined' ) { %>
@@ -47,5 +53,85 @@
     </div>
   </div>
 </div>
+<script>
+  const productForm = document.getElementById('productForm');
+
+  productForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (validateForm()) {
+      this.submit();
+    }
+  });
+
+  function validateForm() {
+    const nameInput = document.getElementById('name');
+    const priceInput = document.getElementById('price');
+    const stockInput = document.getElementById('stock');
+    const descriptionInput = document.getElementById('description');
+    const categoryInput = document.getElementById('category');
+    const imageInput = document.getElementById('image');
+
+    const nameError = document.getElementById('nameError');
+    const priceError = document.getElementById('priceError');
+    const stockError = document.getElementById('stockError');
+    const descriptionError = document.getElementById('descriptionError');
+    const categoryError = document.getElementById('categoryError');
+    const imageError = document.getElementById('imageError');
+
+    nameError.textContent = '';
+    priceError.textContent = '';
+    stockError.textContent = '';
+    descriptionError.textContent = '';
+    categoryError.textContent = '';
+    imageError.textContent = '';
+
+    let isValid = true;
+
+    if (nameInput.value.trim() === '') {
+      nameError.textContent = 'Product Name is required';
+      isValid = false;
+    }
+
+    if (priceInput.value === '' || priceInput.value <= 0) {
+      priceError.textContent = 'Price must be a positive value';
+      isValid = false;
+    }
+
+    if (stockInput.value === '' || stockInput.value < 0) {
+      stockError.textContent = 'Stock must be a non-negative value';
+      isValid = false;
+    }
+
+    if (descriptionInput.value.trim() === '') {
+      descriptionError.textContent = 'Description is required';
+      isValid = false;
+    }
+
+    if (categoryInput.value === '') {
+      categoryError.textContent = 'Category is required';
+      isValid = false;
+    }
+
+    // Validation for image input
+    if (imageInput.files.length === 0) {
+      imageError.textContent = 'Product Image is required';
+      isValid = false;
+    } else {
+      // Check if the selected files are valid images (optional)
+      const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+      for (let i = 0; i < imageInput.files.length; i++) {
+        const fileExtension = imageInput.files[i].name.split('.').pop().toLowerCase();
+        if (!allowedExtensions.includes('.' + fileExtension)) {
+          imageError.textContent = 'Invalid file type. Only JPG, JPEG, PNG, and WEBP images are allowed.';
+          isValid = false;
+          break;
+        }
+      }
+    }
+
+    return isValid;
+  }
+</script>
+
 
 <%- include("../admin/layouts/adminFooter.ejs") %>

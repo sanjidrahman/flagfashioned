@@ -13,7 +13,7 @@ const loadDashboard = async (req , res) => {
             { $group: { _id: null, total: { $sum: '$products.totalPrice' } } },
             { $project: { total: 1, _id: 0 } },
           ]);
-        const totalOrders = await Order.find({ status : 'placed' }).countDocuments()  
+        const totalOrders = await Order.find({ }).countDocuments()  
         const totalSold = await Order.aggregate([
             { $unwind: '$products' },
             { $match: { 'products.status' : 'delivered' }},
@@ -25,13 +25,18 @@ const loadDashboard = async (req , res) => {
             { $match : { payment : 'cod' , 'products.status' : 'delivered' }},
             { $group : { _id : null , total : {$sum : '$totalAmount' }}},
             { $project : { total : 1 , _id : 0 }}
-        ])
+        ]);
         const paymentRazor = await Order.aggregate([
             { $match : { payment : 'razor' , 'products.status' : 'delivered' }},
             { $group : { _id : null , total : {$sum : '$totalAmount' }}},
             { $project : { total : 1 , _id : 0 }}
-        ])
-        console.log(paymentRazor);
+        ]);
+        const expected = await Order.aggregate([
+            { $group: { _id: null, totalAmount: { $sum: '$totalAmount' }}},
+            { $project: { _id: 0, totalAmount: 1 }},
+          ]);
+          console.log(expected);
+
         res.render('dashboard' , {
             users,
             totalAmount,
@@ -39,7 +44,8 @@ const loadDashboard = async (req , res) => {
             totalSold,
             totalPending,
             paymentCod,
-            paymentRazor
+            paymentRazor,
+            expected
         })
         
     } catch (err) {

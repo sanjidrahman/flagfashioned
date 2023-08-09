@@ -218,43 +218,46 @@
         </div>
         <!-- page-body-wrapper ends -->
       </div>
+      <%- include("../admin/layouts/adminFooter.ejs") %>
       <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
       <script>
 
 const paymentRazor = parseInt("<%= paymentRazor[0].total %>")  
 const paymentCod = parseInt("<%= paymentCod[0].total %>")   
+// const expected = parent('<%= expected[0].totalAmount %>')
+// const generated = parseInt('<%= totalAmount[0].total %>')
 
- var options = {
-          series: [{
-          name: 'Weekly Revenue',
-          data: [100,101,10]
-        }, {
-          name: 'Monthy Revenue',
-          data: [20,90,20]
-        }],
-          chart: {
-          height: 350,
-          type: 'area'
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          curve: 'smooth'
-        },
-        xaxis: {
-          type: 'datetime',
-          categories: ["2018-09-19", "2018-09-19T01:30:00.000Z", "2018-09-19T02:30:00.000Z", "2018-09-19T03:30:00.000Z", "2018-09-19T04:30:00.000Z", "2018-09-19T05:30:00.000Z", "2018-09-19T06:30:00.000Z"]
-        },
-        tooltip: {
-          x: {
-            format: 'dd/MM/yy'
-          },
-        },
-        };
+//  var options = {
+//           series: [{
+//           name: 'Expected Revenue',
+//           data: [45,101,10]
+//         }, {
+//           name: 'Generated Revenue',
+//           data: [20,90,20]
+//         }],
+//           chart: {
+//           height: 350,
+//           type: 'area'
+//         },
+//         dataLabels: {
+//           enabled: false
+//         },
+//         stroke: {
+//           curve: 'smooth'
+//         },
+//         xaxis: {
+//           type: 'datetime',
+//           categories: ["2018-09-19", "2018-09-19T01:30:00.000Z", "2018-09-19T02:30:00.000Z", "2018-09-19T03:30:00.000Z", "2018-09-19T04:30:00.000Z", "2018-09-19T05:30:00.000Z", "2018-09-19T06:30:00.000Z"]
+//         },
+//         tooltip: {
+//           x: {
+//             format: 'dd/MM/yy'
+//           },
+//         },
+//         };
 
-        var chart = new ApexCharts(document.querySelector("#chart"), options);
-        chart.render();
+//         var chart = new ApexCharts(document.querySelector("#chart"), options);
+//         chart.render();
 
 
 
@@ -281,5 +284,5 @@ const paymentCod = parseInt("<%= paymentCod[0].total %>")
 
       </script>
 
-<%- include("../admin/layouts/adminFooter.ejs") %>
+
 

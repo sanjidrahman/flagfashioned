@@ -19,5 +19,18 @@
     </form>
   </div>
 
+  <script>
+    document.getElementById("categoryForm").addEventListener("submit", function(event) {
+      var categoryNameInput = document.getElementById("categoryName");
+      var categoryNameValue = categoryNameInput.value.trim();
+  
+      // Check if the category name contains only spaces
+      if (categoryNameValue === "") {
+        event.preventDefault(); // Prevent form submission
+        alert("Category name cannot be empty or contain only spaces.");
+      }
+    });
+  </script>
+
 <%- include("../admin/layouts/adminFooter.ejs") %>
   

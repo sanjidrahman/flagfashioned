@@ -41,12 +41,12 @@ const addToCart = async (req, res, next) => {
                 await Cart.findOneAndUpdate({ user: userId, 'products.productId': productId },
                     {
                         $inc: {
-                            'products.$.quantity': req.body.quantity,
-                            'products.$.totalPrice': req.body.quantity * product.price
+                            'products.$.quantity': 1,
+                            'products.$.totalPrice': 1 * product.price
                         }
                     })
             } else {
-                const total = req.body.quantity * product.price
+                const total = 1 * product.price
                 await Cart.findOneAndUpdate({ user: userId },
                     {
                         $push: {
@@ -61,7 +61,7 @@ const addToCart = async (req, res, next) => {
             }
 
         } else {
-            const total = req.body.quantity * product.price
+            const total = 1 * product.price
             const cartData = new Cart({
                 user: req.session.user_id,
                 products: [{

@@ -29,7 +29,6 @@
     <div id="preloder">
         <div class="loader"></div>
     </div>
-
     <!-- Offcanvas Menu Begin -->
     <div class="offcanvas-menu-overlay"></div>
     <div class="offcanvas-menu-wrapper">
@@ -104,14 +103,21 @@
                         </ul>
                     </nav>
                 </div>
-                <div class="col-lg-3 col-md-3">
-                    <div class="header__nav__option">
-                        <a href="#" class="search-switch"><img src="/userassets/img/icon/search.png" alt=""></a>
-                        <a href="/wishlist"><img src="/userassets/img/icon/heart.png" alt=""></a>
-                        <a href="/cart"><img src="/userassets/img/icon/cart.png" alt=""> <span>0</span></a>
-                        <div class="price">$0.00</div>
+                <% if (session) { %> 
+                    <div class="col-lg-3 col-md-3">
+                        <div class="header__nav__option">
+                            <a href="/wishlist"><img src="/userassets/img/icon/heart.png" alt=""></a>
+                            <a href="/cart"><img src="/userassets/img/icon/cart.png" alt=""> <span> 0</span></a>
+                        </div>
                     </div>
-                </div>
+                <% } else { %>
+                    <div class="col-lg-3 col-md-3">
+                        <div class="header__nav__option">
+                            <a href="/wishlist"><img src="/userassets/img/icon/heart.png" alt=""></a>
+                            <a href="/cart"><img src="/userassets/img/icon/cart.png" alt=""> <span>0</span></a>
+                        </div>
+                    </div>
+                <% } %> 
             </div>
             <div class="canvas__open"><i class="fa fa-bars"></i></div>
         </div>

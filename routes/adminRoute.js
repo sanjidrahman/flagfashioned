@@ -48,6 +48,7 @@ admin_route.get('/order-detail' , auth.isLogin , orderController.orderDetails)
 admin_route.post('/order-details' , orderController.update)
 admin_route.get('/sales-report' , auth.isLogin , orderController.salesReport)
 admin_route.post('/sales-report' , orderController.sortSalesReport)
+admin_route.post('/sort' , orderController.sort)
 
 
 admin_route.get('/coupon' , auth.isLogin , couponController.loadCoupon)

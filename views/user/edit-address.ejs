@@ -20,7 +20,8 @@
     <div class="container mt-5 mb-5">
         <div class="row">
             <div class="col-md-6 offset-md-3">
-                <form action="/edit-address" method="post">
+                <form action="/edit-address" method="post" onsubmit="return validateForm()">
+                    <div class="error-message" style="color: red;" id="codeError"></div>
                     <div class="form-group">
                         <label for="firstName">First Name:</label>
                         <input type="text" class="form-control" id="fname" name="fname" value="<%= address.fname %>" placeholder="Enter first name" required>
@@ -32,6 +33,7 @@
                     <div class="form-group">
                         <label for="phone">Phone:</label>
                         <input type="number" class="form-control" id="phone" name="phone" value="<%= address.phone %>" placeholder="Enter phone number" required>
+                        <div class="error-message" style="color: red;" id="phoneError"></div>
                     </div>
                     <div class="form-group">
                         <label for="address">Address:</label>
@@ -44,6 +46,7 @@
                     <div class="form-group">
                         <label for="pin">PIN:</label>
                         <input type="number" class="form-control" id="pin" name="pin" value="<%= address.pin %>" placeholder="Enter PIN code" required>
+                        <div class="error-message" style="color: red;" id="pinError"></div>
                     </div>
                     <input type="hidden" name="addressId" id="addressId" value="<%= address._id %>">
                     <button type="submit" class="btn btn-primary">Submit</button>
@@ -52,6 +55,43 @@
         </div>
     </div>
 
+    <script>
+        function validateForm() {
+            const fname = document.getElementById('fname').value.trim();
+            const lname = document.getElementById('lname').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const pin = document.getElementById('pin').value.trim();
+            console.log(fname);
+    
+            const codeError = document.getElementById('codeError');
+            const phoneError = document.getElementById('phoneError');
+            const pinError = document.getElementById('pinError');
+    
+            codeError.innerText = '';
+            phoneError.innerText = '';
+            pinError.innerText = '';
+    
+            // Check if any field is empty or contains only spaces
+            if (fname === '' || lname === '' || phone === '' || address === '' || city === '' || pin === '') {
+                codeError.innerText = 'Please fill all the fields.';
+                return false;
+            }
+    
+            // Check if phone number is exactly 10 digits
+            if (phone.length !== 10 || phone.length > 10) {
+                phoneError.innerText = 'Phone number should be 10 digits.';
+                return false;
+            }
+    
+            // Check if pin code is exactly 6 digits
+            if (pin.length !== 6) {
+                pinError.innerText = 'PIN code should be 6 digits.';
+                return false;
+            }
+        }
+    </script>
 
 
     <%- include("../user/layouts/userfooter.ejs") %>

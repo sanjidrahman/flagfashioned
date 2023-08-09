@@ -6,6 +6,7 @@ const Order = require('../models/orderModel')
 const Coupon = require('../models/couponModel')
 const Razorpay = require('razorpay');
 const { update } = require('./orderController')
+const { log } = require('console')
 
 var instance = new Razorpay({
     key_id: process.env.KEY_ID,
@@ -142,22 +143,70 @@ const deleteAddress = async (req, res, next) => {
 const placeOrder = async (req, res, next) => {
     try {
 
-
+        const code = req.body.code
         const bodyaddress = req.body.selectedAddress
         const total = req.body.total
+        console.log(total);
         const payment = req.body.payment
 
         let status = payment == 'cod' ? 'placed' : 'pending'
 
         userId = req.session.user_id
         const user = await User.findOne({ _id: userId })
-        const cartData = await Cart.findOne({ user: userId })
+        const coupon = await Coupon.findOne({ code: code })
 
+        const cartData = await Cart.findOne({ user: userId })
         const cartProducts = cartData.products
 
         const orderDate = new Date();
         const delivery = new Date(orderDate.getTime() + (10 * 24 * 60 * 60 * 1000));
         const deliveryDate = delivery.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).replace(/\//g, '-');
+
+        if (coupon) {
+            const minus = coupon.discountPercentage / 100
+            for (i = 0; i < cartProducts.length; i++) {
+                const productId = cartProducts[i].productId
+                const total = cartProducts[i].quantity * cartProducts[i].price
+                await Cart.findOneAndUpdate({ user: req.session.user_id, 'products.productId': productId }, {
+                    $set: { 'products.$.totalPrice': Math.ceil(total - (total * minus)) }
+                })
+            }
+        }
+
+        const cartDataa = await Cart.findOne({ user: userId })
+        const cartProductss = cartDataa.products
+
+        if( total == 0 ) {
+            const order = new Order({
+                user: userId,
+                deliveryAddress: bodyaddress,
+                userName: user.name,
+                totalAmount: total,
+                status: 'placed',
+                date: orderDate,
+                payment: 'wallet',
+                products: cartProductss,
+                expectedDelivery: deliveryDate,
+            })
+    
+            const orderData = await order.save()
+            const orderid = orderData._id
+
+            await Cart.deleteOne({ user: req.session.user_id })
+            await Coupon.findOneAndUpdate({ code: code }, { $push: { user: req.session.user_id } });
+            await User.findOneAndUpdate({ _id : req.session.user_id } , {$inc : { wallet : -total }})
+
+            for (let i = 0; i < cartProducts.length; i++) {
+                const productId = cartProducts[i].productId
+                const count = cartProducts[i].quantity
+                const product = await Product.findOne({ _id : productId })
+                if(product.stock !==0 ){
+                    await Product.findByIdAndUpdate({ _id: productId }, { $inc: { stock: -count } })
+                }
+            }
+
+            return res.json({ success: true, params: orderid })
+        }
 
         const order = new Order({
             user: userId,
@@ -167,8 +216,8 @@ const placeOrder = async (req, res, next) => {
             status: status,
             date: orderDate,
             payment: payment,
-            products: cartProducts,
-            expectedDelivery: deliveryDate
+            products: cartProductss,
+            expectedDelivery: deliveryDate,
         })
 
         const orderData = await order.save()
@@ -181,7 +230,10 @@ const placeOrder = async (req, res, next) => {
             for (let i = 0; i < cartProducts.length; i++) {
                 const productId = cartProducts[i].productId
                 const count = cartProducts[i].quantity
-                await Product.findByIdAndUpdate({ _id: productId }, { $inc: { stock: -count } })
+                const product = await Product.findOne({ _id : productId })
+                if(product.stock !==0 ){
+                    await Product.findByIdAndUpdate({ _id: productId }, { $inc: { stock: -count } })
+                }
             }
 
 
@@ -212,19 +264,9 @@ const placeOrder = async (req, res, next) => {
 
 const verifypayment = async (req, res, next) => {
     try {
-        let userData = await User.findOne({ _id: req.session.user_id })
+
         const code = req.body.code
-        console.log(code);
-        const coupon = await Coupon.findOne({ code: code })
-        const minus = coupon.discountPercentage / 100
-        const update = await Cart.findOneAndUpdate(
-            { user: req.session.user_id },
-            { $mul: { 'products.$[].totalPrice':  minus }},
-            { new: true }
-        )
-
-        console.log(update);
-
+        let userData = await User.findOne({ _id: req.session.user_id })
         const cartData = await Cart.findOne({ user: req.session.user_id })
         const cartProducts = cartData.products
 
@@ -261,6 +303,31 @@ const verifypayment = async (req, res, next) => {
     }
 }
 
+const wallet = async (req, res, next) => {
+    try {
+
+        let total = req.body.total;
+        console.log(total);
+
+        const user = await User.findOne({ _id: req.session.user_id });
+        const wallet = user.wallet;
+        console.log(wallet);
+
+        if (wallet > total) {
+            total = 0;  
+        } else {
+            total = Math.abs(wallet - total); 
+        }
+        console.log(total);
+
+        res.json({ success: true, total });
+
+
+    } catch (err) {
+        next(err.message)
+    }
+}
+
 
 
 module.exports = {
@@ -271,4 +338,5 @@ module.exports = {
     deleteAddress,
     placeOrder,
     verifypayment,
+    wallet
 }
