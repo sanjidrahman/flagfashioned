@@ -32,20 +32,17 @@ const securepassword = async (password) => {
 
 const sendVerifyMail = async (name, email, otp) => {
     try {
-
+  
         const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false,
-            requireTLS: true,
+            service: 'gmail',
             auth: {
-                user: process.env.USER,
+                user: process.env.MAIL,
                 pass: process.env.PASS
             },
         })
 
         const mailOptions = {
-            from: process.env.USER,
+            from: process.env.MAIL,
             to: email,
             subject: 'For Email Verification',
             html: '<p> Hi ' + name + ' , please enter ' + otp + ' for your OTP verification'
