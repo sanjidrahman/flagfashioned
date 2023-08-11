@@ -36,6 +36,10 @@ const loadDashboard = async (req, res) => {
       { $group: { _id: null, total: { $sum: "$totalAmount" } } },
       { $project: { total: 1, _id: 0 } },
     ]);
+    let wallet = 0
+    if(paymentWallet.length > 0) {
+      wallet = paymentWallet[0].total
+    }
     const expected = await Order.aggregate([
       { $group: { _id: null, totalAmount: { $sum: "$totalAmount" } } },
       { $project: { _id: 0, totalAmount: 1 } },
@@ -76,6 +80,7 @@ const loadDashboard = async (req, res) => {
     console.log(paymentRazor);
     console.log(paymentWallet);
 
+
     res.render("dashboard", {
       users,
       totalAmount,
@@ -85,7 +90,7 @@ const loadDashboard = async (req, res) => {
       paymentCod,
       paymentRazor,
       expected,
-      paymentWallet,
+      wallet,
       trending,
     });
   } catch (err) {

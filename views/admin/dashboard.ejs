@@ -91,7 +91,7 @@
                           <h6 class="mb-1">Payment via Wallet</h6>
                         </div>
                         <div class="align-self-center flex-grow text-right text-md-center text-xl-right py-md-2 py-xl-0">
-                          <h6 class="font-weight-bold mb-0">₹ <%= paymentWallet[0].total %></h6>
+                          <h6 class="font-weight-bold mb-0">₹ <%= wallet %></h6>
                         </div>
                       </div>
                       <% } else { %>
@@ -190,7 +190,7 @@
 
 const paymentRazor = parseInt("<%= paymentRazor[0].total %>")  
 const paymentCod = parseInt("<%= paymentCod[0].total %>")   
-const paymentWallet = parseInt("<%= paymentWallet[0].total %>")  
+const paymentWallet = parseInt("<%= wallet %>")  
 console.log(paymentRazor);
 console.log(paymentCod);
 console.log(paymentWallet);
