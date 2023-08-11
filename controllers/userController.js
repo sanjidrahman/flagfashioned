@@ -276,7 +276,6 @@ const loadShopDetails = async (req, res) => {
         const isProductFound = result.some(order =>
             order.products.some(product => product.productId.toString() == id)
         );
-        console.log(isProductFound);
           
         res.render('shop-details', { products: product, session: req.session.user_id , isProductFound })
 
