@@ -139,6 +139,31 @@
                   </div>
                 </div>                
               </div>
+                <div class="content-wrapper" style="background-color: #191c24; height: 500px;">
+                  <h2 class="mb-5">Trending Product</h2>
+                  <div class="row">
+                    <% if(trending && trending[0]) { %>
+                      <div class="col-md-6">
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="product-image">
+                              <img src="/adminassets/productImages/<%= trending[0].image[0] %>" alt="" class="" style="height: 300px; width: 270px;">
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="product-details">
+                              <h4><%= trending[0].name %></h4>
+                              <p><%= trending[0].description %></p>
+                              <p class="text-white">Price: ₹ <%= trending[0].price %></p>
+                            </div>
+                            <h4>Total orders : <%= trending[0].totalOrders %></h4>
+                            <h4>Total amount generated : ₹ <%= trending[0].totalSales %></h4>
+                          </div>
+                        </div>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
               <div class="">
                 <div id="chart" class="mb-3" style="background-color: #191c24;" ></div>
               </div>
