@@ -71,7 +71,6 @@ const loadDashboard = async (req, res) => {
       },
       { $sort: { totalOrders: -1 } },
     ]);
-    console.log(trending);
 
     res.render("dashboard", {
       users,
