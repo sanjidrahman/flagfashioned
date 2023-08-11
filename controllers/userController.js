@@ -65,14 +65,20 @@ const sendVerifyMail = async (name, email, otp) => {
 const loadHome = async (req, res) => {
     try {
 
-        const count = await Cart.aggregate([
-            { $match : { user : req.session.user_id }},
-            { $project: { count : { $size: "$products" }}}
-          ]);        
-        console.log(count);
         const banners = await Banner.find({})
         const product = await Product.find({ is_delete: 0 })
-        res.render('home', { products: product, session: req.session.user_id, banners , count })
+        const data = await Cart.findOne({user : req.session.user_id})
+        if(data) {
+            const count = data.products.length
+            console.log(count);
+            res.render('home', { products: product, session: req.session.user_id, banners , count })
+        }else{
+            res.render('home', { products: product, session: req.session.user_id, banners  })
+        }
+      
+      
+        
+       
 
     } catch (err) {
         console.log(err.message);
