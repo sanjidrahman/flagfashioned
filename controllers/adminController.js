@@ -72,6 +72,10 @@ const loadDashboard = async (req, res) => {
       { $sort: { totalOrders: -1 } },
     ]);
 
+    console.log(paymentCod);
+    console.log(paymentRazor);
+    console.log(paymentWallet);
+
     res.render("dashboard", {
       users,
       totalAmount,
