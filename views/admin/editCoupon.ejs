@@ -65,7 +65,7 @@ include("../admin/layouts/adminNavbar.ejs") %>
             id="startDate"
             style="color: white"
             name="startDate"
-            value="<%= coupons.startDate %>"
+            value="<%= coupons.startDate.toISOString().split('T')[0] %>"
             required
           />
           <div
@@ -82,7 +82,7 @@ include("../admin/layouts/adminNavbar.ejs") %>
             id="expiryDate"
             style="color: white"
             name="expiryDate"
-            value="<%= coupons.expireDate %>"
+            value="<%= coupons.expireDate.toISOString().split('T')[0] %>"
             required
           />
           <div
