@@ -32,7 +32,7 @@ const loadDashboard = async (req, res) => {
       { $project: { total: 1, _id: 0 } },
     ]);
     const paymentWallet = await Order.aggregate([
-      { $match: { payment: "wallet", "products.status": "delivered" } },
+      { $match: { payment: "walle", "products.status": "delivered" } },
       { $group: { _id: null, total: { $sum: "$totalAmount" } } },
       { $project: { total: 1, _id: 0 } },
     ]);
