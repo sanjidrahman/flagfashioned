@@ -331,7 +331,7 @@
                             <% } %>
                     </div>
                
-
+                    <% if (isProductFound) { %>
                     <div class="add-review-form">
                         <h3>Add Your Review</h3>
                         <form id="reviewForm" action="/review" method="post" onclick="return validateForm()">
@@ -342,6 +342,7 @@
                             <button type="submit">Submit Review</button>
                         </form>
                     </div>
+                    <% } %>
                 </div>
             </div>
         </div>
