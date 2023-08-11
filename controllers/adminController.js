@@ -31,11 +31,15 @@ const loadDashboard = async (req , res) => {
             { $group : { _id : null , total : {$sum : '$totalAmount' }}},
             { $project : { total : 1 , _id : 0 }}
         ]);
+        const paymentWallet = await Order.aggregate([
+            { $match : { payment : 'wallet' , 'products.status' : 'delivered' }},
+            { $group : { _id : null , total : {$sum : '$totalAmount' }}},
+            { $project : { total : 1 , _id : 0 }}
+        ]);
         const expected = await Order.aggregate([
             { $group: { _id: null, totalAmount: { $sum: '$totalAmount' }}},
             { $project: { _id: 0, totalAmount: 1 }},
           ]);
-          console.log(expected);
 
         res.render('dashboard' , {
             users,
@@ -45,7 +49,8 @@ const loadDashboard = async (req , res) => {
             totalPending,
             paymentCod,
             paymentRazor,
-            expected
+            expected,
+            paymentWallet
         })
         
     } catch (err) {

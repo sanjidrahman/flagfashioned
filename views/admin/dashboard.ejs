@@ -85,14 +85,25 @@
                           <h6 class="font-weight-bold mb-0">₹ <%= paymentCod[0].total %></h6>
                         </div>
                       </div>
+                      <% if (paymentWallet[0] && paymentWallet[0].total) { %> 
                       <div class="bg-gray-dark d-flex d-md-block d-xl-flex flex-row py-3 px-4 px-md-3 px-xl-4 rounded mt-3">
                         <div class="text-md-center text-xl-left">
                           <h6 class="mb-1">Payment via Wallet</h6>
                         </div>
                         <div class="align-self-center flex-grow text-right text-md-center text-xl-right py-md-2 py-xl-0">
-                          <h6 class="font-weight-bold mb-0">₹ 593</h6>
+                          <h6 class="font-weight-bold mb-0">₹ <%= paymentWallet[0].total %></h6>
                         </div>
                       </div>
+                      <% } else { %>
+                        <div class="bg-gray-dark d-flex d-md-block d-xl-flex flex-row py-3 px-4 px-md-3 px-xl-4 rounded mt-3">
+                          <div class="text-md-center text-xl-left">
+                            <h6 class="mb-1">Payment via Wallet</h6>
+                          </div>
+                          <div class="align-self-center flex-grow text-right text-md-center text-xl-right py-md-2 py-xl-0">
+                            <h6 class="font-weight-bold mb-0">₹ <%= 0.00 %></h6>
+                          </div>
+                        </div>
+                      <% } %>
                     </div>
                   </div>
                 </div>
@@ -107,8 +118,6 @@
                           <div class="preview-list">
                             <% users.forEach((user) => { %>
                             <div class="preview-item border-bottom">
-                              <!-- Customize this section based on your user data structure -->
-                              <!-- You can access user properties like user.name, user.email, etc. -->
                               <div class="preview-thumbnail">
                                 <div class="preview-icon bg-primary">
                                   <i class="bi bi-person"></i>
