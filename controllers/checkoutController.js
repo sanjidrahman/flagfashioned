@@ -146,10 +146,15 @@ const placeOrder = async (req, res, next) => {
         const code = req.body.code
         const bodyaddress = req.body.selectedAddress
         const total = req.body.total
-        console.log(total);
+        const grand = req.body.grand
         const payment = req.body.payment
+        const checkstat = req.body.checkstat
 
         let status = payment == 'cod' ? 'placed' : 'pending'
+
+        if(checkstat == true) {
+            status = payment + 'wallet'
+        }
 
         userId = req.session.user_id
         const user = await User.findOne({ _id: userId })
@@ -194,7 +199,7 @@ const placeOrder = async (req, res, next) => {
 
             await Cart.deleteOne({ user: req.session.user_id })
             await Coupon.findOneAndUpdate({ code: code }, { $push: { user: req.session.user_id } });
-            await User.findOneAndUpdate({ _id : req.session.user_id } , {$inc : { wallet : -total }})
+            await User.findOneAndUpdate({ _id : req.session.user_id } , {$inc : { wallet : -grand }})
 
             for (let i = 0; i < cartProducts.length; i++) {
                 const productId = cartProducts[i].productId
@@ -311,14 +316,13 @@ const wallet = async (req, res, next) => {
 
         const user = await User.findOne({ _id: req.session.user_id });
         const wallet = user.wallet;
-        console.log(wallet);
 
         if (wallet > total) {
+            console.log('1');
             total = 0;  
         } else {
             total = Math.abs(wallet - total); 
         }
-        console.log(total);
 
         res.json({ success: true, total });
 

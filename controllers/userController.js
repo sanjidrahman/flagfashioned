@@ -13,6 +13,7 @@ const fs = require('fs')
 const ejs = require('ejs')
 const puppeteer = require('puppeteer')
 const path = require('path')
+const { wallet } = require('./checkoutController')
 
 
 let otp;
@@ -288,8 +289,9 @@ const loadProifle = async (req, res) => {
         const orders = await Order.find({ user: req.session.user_id, status: 'placed' }).populate('products.productId').sort({ date: -1 })
         const address = await Address.findOne({ user: req.session.user_id })
         const users = await User.findOne({ _id: req.session.user_id })
+        const walletHistory = await Order.find({ user : req.session.user_id , payment : 'wallet' , status : 'placed' }).sort({ date: -1 })
 
-        res.render('user-profile', { user: users, addresses: address, session: req.session.user_id, order: orders })
+        res.render('user-profile', { user: users, addresses: address, session: req.session.user_id, order: orders , walletHistory })
 
     } catch (err) {
         console.log(err.message);

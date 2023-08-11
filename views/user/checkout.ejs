@@ -189,12 +189,14 @@
                                             <h6>Summary</h6>
                                             <ul>
                                                 <li>Subtotal <span>₹ <%= grandTotal %></span></li>
-                                                <li>Delivery Charges <span>₹ <%= total %></span></li>
+                                                <li>Delivery Charges <span class="text-success"> FREE </span></li>
                                                 <li>Total <span id="totalAmount">₹ <%= total %></span></li>
                                             </ul>
                                             <input type="hidden" name='total' id="total" value="<%= total %>">
                                             <!-- this is to get correct amount before when its not ckecked -->
                                             <input type="hidden" name='total1' id="total1" value="<%= total %>">
+                                            <!-- it for only reducing wallet amount when payment is in wallet -->
+                                            <input type="hidden" name='grand' id="grand" value="<%= grandTotal %>">
                                             <hr>
                                             <h6>Select payment method</h6>
                                             <ul>
@@ -205,7 +207,7 @@
                                                 </li>
                                                 <% if ( wallet> 0 ) { %>
                                                     <li>
-                                                        <input type="checkbox" onclick="action()" id="payment"
+                                                        <input type="checkbox" onclick="action()" id="checkbox"
                                                             name="payment" value="wallet" required>
                                                         <label for="paymentMethod1">Wallet</label><span id="wallet"
                                                             style="color: black;">Available Balance : ₹ <%= wallet %>
@@ -291,7 +293,12 @@
                     success: (response) => {
                         if (response.success) {
                             const updatedTotal = response.total;
-                            const updateWallet =  wallet - total
+                            let updateWallet =  wallet - total
+                            if(updateWallet > 0) {
+                                updateWallet
+                            }else{
+                                updateWallet = 0
+                            }
                             $("li > span#totalAmount").text(`₹ ${updatedTotal}`);
                             $("#total").val(updatedTotal);
                             $("li > span#wallet").text(`Available Balance : ₹ ${updateWallet}`)
@@ -402,14 +409,24 @@
 
         function placeOrder() {
 
+            const checkbox = document.getElementById('checkbox')
+            let checkstat
+            if(checkbox.checked) {
+                checkstat = true
+            }else{
+                checkstat = false
+            }
             const address = document.querySelector('input[name = "selectedAddress"]:checked').value
             const payment = document.querySelector('input[name = "payment"]:checked').value
             const total = document.getElementById('total').value
             const code = document.getElementById('code').value
+            const grand = document.getElementById('grand').value
             console.log(address);
             console.log(payment);
             console.log(total);
             console.log(code);
+            console.log(checkstat);
+            console.log(grand);
 
             $.ajax({
                 url: '/checkout',
@@ -418,7 +435,9 @@
                     selectedAddress: address,
                     payment: payment,
                     total: total,
-                    code
+                    code,
+                    grand,
+                    checkstat
                 },
                 success: (response) => {
                     if (response.success) {

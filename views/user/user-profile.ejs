@@ -219,31 +219,32 @@
 
                     <div class="card mb-4" id="walletDetails" style="display: none; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
                         <h5>User Wallet Balance</h5>
-                        <strong>Current Balance: ₹ <%= user.wallet %></strong>
+                        <% if(user.wallet) {%>
+                            <strong>Current Balance: ₹ <%= user.wallet %></strong>
+                        <%} else { %>
+                            <strong>Current Balance: ₹ 0.00</strong>
+                        <% } %>
+                       
                     
-                        <% if (order.payment === 'wallet') { %>
-                        <h5>Wallet History</h5>
-                        <table style="width: 100%;">
+                        <% if (walletHistory) { %>
+                        <h3 class="mt-4">Wallet History</h3>
+                        <table class="mt-3" style="width: 100%; border-collapse: collapse;">
                             <thead>
                                 <tr>
-                                    <th style="border-bottom: 1px solid #ccc;">Date</th>
-                                    <th style="border-bottom: 1px solid #ccc;">Description</th>
-                                    <th style="border-bottom: 1px solid #ccc;">Amount</th>
+                                    <th style="border-bottom: 1px solid #ccc; padding: 8px; background-color: #f0f0f0; text-align: left;">Date</th>
+                                    <th style="border-bottom: 1px solid #ccc; padding: 8px; background-color: #f0f0f0; text-align: left;">Description</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- You can add dynamic data here using JavaScript -->
-                                <!-- For example, use a loop to iterate through wallet history and populate the rows -->
-                                <!-- Example using EJS loop for dynamic data -->
-                                <% /* for (let item of walletHistory) { */ %>
-                                <!--     <tr>
-                                        <td><%= item.date %></td>
-                                        <td><%= item.description %></td>
-                                        <td>₹ <%= item.amount %></td>
-                                    </tr> -->
-                                <% /* } */ %>
+                                <% walletHistory.forEach(order => { %>
+                                    <tr>
+                                        <td style="border-bottom: 1px solid #ccc; padding: 8px;"><%= order.date.toISOString().slice(0, 10) %></td>
+                                        <td style="border-bottom: 1px solid #ccc; padding: 8px;">Payment done for this order: <%= order._id %></td>
+                                    </tr>
+                                <% }); %>
                             </tbody>
                         </table>
+                        
                         <% } else { %>
                         <h3 class="text-center mt-4 mb-4">No History.</h3>
                         <p class="text-center">Make a payment through wallet to appear here</p>
