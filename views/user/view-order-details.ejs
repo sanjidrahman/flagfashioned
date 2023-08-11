@@ -100,13 +100,6 @@
                             </tbody>
                         </table>
                     </div>
-                    <% if ( order.status !== 'cancelled' || order.status === 'returned') { %>
-                        <div class="d-flex justify-content-end me-5 mt-3">
-                            <a href="/invoice/<%= order._id %>" class="btn btn-primary button " >
-                                Generate Invoice
-                            </a>
-                        </div>
-                    <% } %>
                 </div>
                 <% } %>
             </div>
