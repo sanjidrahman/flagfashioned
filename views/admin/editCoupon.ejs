@@ -1,96 +1,184 @@
-<%- include("../admin/layouts/adminHeader.ejs") %>
-<%- include("../admin/layouts/adminSidebar.ejs") %>
-<%- include("../admin/layouts/adminNavbar.ejs") %>
+<%- include("../admin/layouts/adminHeader.ejs") %> <%-
+include("../admin/layouts/adminSidebar.ejs") %> <%-
+include("../admin/layouts/adminNavbar.ejs") %>
 
-<div class="container" style="margin-top: 80px;">
-    <div class="card">
-      <div class="card-body">
-        <h2 class="card-title">Create Coupon</h2>
-        <form action="/admin/edit-coupon" method="POST" id="couponForm">
-          <div class="mb-3">
-            <label for="code" class="form-label">Coupon Code</label>
-            <input type="text" class="form-control" id="code" name="code" style="color: white;" value="<%= coupons.code %>" required>
-            <div class="error-message" style="color: red;" id="codeError"></div>
-          </div>
-          <div class="mb-3">
-            <label for="discountPercentage" class="form-label">Discount Percentage</label>
-            <input type="number" class="form-control" id="discountPercentage" name="discountPercentage" style="color: white;" value="<%= coupons.discountPercentage %>" required>
-            <div class="error-message" style="color: red;" id="discountError"></div>
-          </div>
-          <div class="mb-3">
-            <label for="minimum" class="form-label">Minimum Amount</label>
-            <input type="number" class="form-control" id="minimum" name="minimum" style="color: white;" value="<%= coupons.discountPercentage %>" required>
-            <div class="error-message" style="color: red;" id="discountError"></div>
-          </div>
-          <div class="mb-3">
-            <label for="startDate" class="form-label">Start Date</label>
-            <input type="date" class="form-control" id="startDate" style="color: white;" name="startDate" value="<%= coupons.startDate %>" required>
-            <div class="error-message" style="color: red;" id="startDateError"></div>
-          </div>
-          <div class="mb-3">
-            <label for="expiryDate" class="form-label">Expiry Date</label>
-            <input type="date" class="form-control" id="expiryDate" style="color: white;" name="expiryDate" value="<%= coupons.expireDate %>" required>
-            <div class="error-message" style="color: red;" id="expiryDateError"></div>
-          </div>
-          <input type="hidden" name="id" value="<%= coupons._id %>">
-          <button type="submit" class="btn btn-primary">Edit Coupon</button>
-        </form>
-      </div>
+<div class="container" style="margin-top: 80px">
+  <div class="card">
+    <div class="card-body">
+      <h2 class="card-title">Create Coupon</h2>
+      <form action="/admin/edit-coupon" method="POST" id="couponForm">
+        <div class="mb-3">
+          <label for="code" class="form-label">Coupon Code</label>
+          <input
+            type="text"
+            class="form-control"
+            id="code"
+            name="code"
+            style="color: white"
+            value="<%= coupons.code %>"
+            required
+          />
+          <div class="error-message" style="color: red" id="codeError"></div>
+        </div>
+        <div class="mb-3">
+          <label for="discountPercentage" class="form-label"
+            >Discount Percentage</label
+          >
+          <input
+            type="number"
+            class="form-control"
+            id="discountPercentage"
+            name="discountPercentage"
+            style="color: white"
+            value="<%= coupons.discountPercentage %>"
+            required
+          />
+          <div
+            class="error-message"
+            style="color: red"
+            id="discountError"
+          ></div>
+        </div>
+        <div class="mb-3">
+          <label for="minimum" class="form-label">Minimum Amount</label>
+          <input
+            type="number"
+            class="form-control"
+            id="minimum"
+            name="minimum"
+            style="color: white"
+            value="<%= coupons.discountPercentage %>"
+            required
+          />
+          <div class="error-message" style="color: red" id="minError"></div>
+          <div
+            class="error-message"
+            style="color: red"
+            id="discountError"
+          ></div>
+        </div>
+        <div class="mb-3">
+          <label for="startDate" class="form-label">Start Date</label>
+          <input
+            type="date"
+            class="form-control"
+            id="startDate"
+            style="color: white"
+            name="startDate"
+            value="<%= coupons.startDate %>"
+            required
+          />
+          <div
+            class="error-message"
+            style="color: red"
+            id="startDateError"
+          ></div>
+        </div>
+        <div class="mb-3">
+          <label for="expiryDate" class="form-label">Expiry Date</label>
+          <input
+            type="date"
+            class="form-control"
+            id="expiryDate"
+            style="color: white"
+            name="expiryDate"
+            value="<%= coupons.expireDate %>"
+            required
+          />
+          <div
+            class="error-message"
+            style="color: red"
+            id="expiryDateError"
+          ></div>
+        </div>
+        <input type="hidden" name="id" value="<%= coupons._id %>" />
+        <button type="submit" class="btn btn-primary">Edit Coupon</button>
+      </form>
     </div>
   </div>
-  
-  
-  <script>
-    const couponForm = document.getElementById('couponForm');
-  
-    couponForm.addEventListener('submit', function (event) {
-      event.preventDefault();
-      if (validateForm()) {
-        this.submit();
-      }
-    });
-  
-    function validateForm() {
-      const codeInput = document.getElementById('code');
-      const discountInput = document.getElementById('discountPercentage');
-      const startDateInput = document.getElementById('startDate');
-      const expiryDateInput = document.getElementById('expiryDate');
-  
-      const codeError = document.getElementById('codeError');
-      const discountError = document.getElementById('discountError');
-      const startDateError = document.getElementById('startDateError');
-      const expiryDateError = document.getElementById('expiryDateError');
-  
-      codeError.textContent = '';
-      discountError.textContent = '';
-      startDateError.textContent = '';
-      expiryDateError.textContent = '';
-  
-      let isValid = true;
-  
-      if (codeInput.value.trim() === '') {
-        codeError.textContent = 'Coupon Code is required';
-        isValid = false;
-      }
-  
-      if (discountInput.value === '' || discountInput.value < 10 || discountInput.value > 80) {
-        discountError.textContent = 'Discount Percentage must be between 10 and 80';
-        isValid = false;
-      }
-  
-      if (startDateInput.value.trim() === '') {
-        startDateError.textContent = 'Start Date is required';
-        isValid = false;
-      }
-  
-      if (expiryDateInput.value.trim() === '') {
-        expiryDateError.textContent = 'Expiry Date is required';
-        isValid = false;
-      }
-  
-      return isValid;
+</div>
+
+<script>
+  const couponForm = document.getElementById("couponForm");
+
+  couponForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    if (validateForm()) {
+      this.submit();
     }
-  </script>
-  
+  });
+
+  function validateForm() {
+    const codeInput = document.getElementById("code");
+    const discountInput = document.getElementById("discountPercentage");
+    const startDateInput = document.getElementById("startDate");
+    const expiryDateInput = document.getElementById("expiryDate");
+    const minimumInput = document.getElementById('minimum')
+
+    const codeError = document.getElementById("codeError");
+    const discountError = document.getElementById("discountError");
+    const startDateError = document.getElementById("startDateError");
+    const expiryDateError = document.getElementById("expiryDateError");
+    const minimumError = document.getElementById('minError')
+
+    codeError.textContent = "";
+    discountError.textContent = "";
+    startDateError.textContent = "";
+    expiryDateError.textContent = "";
+    minimumError.textContent = ""
+
+    let isValid = true;
+
+    if (codeInput.value.trim() === "") {
+      codeError.textContent = "Coupon Code is required";
+      isValid = false;
+    }
+
+    if (
+      discountInput.value === "" ||
+      discountInput.value < 10 ||
+      discountInput.value > 80
+    ) {
+      discountError.textContent =
+        "Discount Percentage must be between 10 and 80";
+      isValid = false;
+    }
+
+    if(minimumInput.value.trim() === '') {
+      minimumError.textContent = 'Minimum amount required'
+    }else{
+      if(minimumInput.value < 1999) {
+        minimumError.textContent = 'Minimum amount should be above 1999'
+      }
+    }
+
+    if (startDateInput.value.trim() === "") {
+      startDateError.textContent = "Start Date is required";
+      isValid = false;
+    } else {
+      const startDate = new Date(startDateInput.value);
+      const currentDate = new Date();
+      if (startDate < currentDate) {
+        startDateError.textContent = "Start Date should not be a past date";
+        isValid = false;
+      }
+    }
+
+    if (expiryDateInput.value.trim() === "") {
+      expiryDateError.textContent = "Expiry Date is required";
+      isValid = false;
+    } else {
+      const startDate = new Date(startDateInput.value);
+      const expireDate = new Date(expiryDateInput.value);
+      const currentDate = new Date();
+      if (expireDate <= startDate) {
+        expiryDateError.textContent = "Expiry Date must be after the start date";
+        isValid = false;
+      }
+    }
+
+    return isValid;
+  }
+</script>
 
 <%- include("../admin/layouts/adminFooter.ejs") %>

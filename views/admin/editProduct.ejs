@@ -106,21 +106,24 @@
         <div class="col-md-6 offset-md-3">
           <h2>Edit Product</h2>
           <div class="col-12 grid-margin stretch-card">
-            <form action="/admin/edit-product" method="POST" enctype="multipart/form-data">
+            <form action="/admin/edit-product" method="POST" id="productForm" enctype="multipart/form-data">
               <div class="mb-3">
                 <label for="name" class="form-label">Product Name</label>
                 <input type="text" class="form-control" id="name" name="name" value="<%= product.name %>"
                   style="color: white;" required>
+                  <div id="nameError" style="color: red;"></div>
               </div>
               <div class="mb-3">
                 <label for="price" class="form-label">Price</label>
                 <input type="number" class="form-control" id="price" name="price" style="color: white;"
                   value="<%= product.price %>" required>
+                  <div id="priceError" style="color: red;"></div>
               </div>
               <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
                 <textarea class="form-control" id="description" name="description" style="color: white;"
                   required><%= product.description %></textarea>
+                  <div id="descriptionError" style="color: red;"></div>
               </div>
               <div class="mb-3">
                 <label for="category" class="form-label">Category</label>
@@ -136,15 +139,16 @@
                 <label class="mt-1">Stock</label>
                 <input class="form-control" type="number" id="stock" name="stock" value="<%= product.stock %>"
                   style="color: white;">
+                  <div id="stockError" style="color: red;"></div>
               </div>
               <div class="mb-3">
                 <label for="image" class="form-label">Product Image</label>
                 <input type="file" class="form-control" id="image" name="image" style="color: white;" multiple>
+                <div id="imageError" style="color: red;"></div>
                 <% product.image.forEach((image, index)=> { %>
                   <div class="image-container">
                     <img class="mt-2" src="/adminassets/productImages/<%= image %>" id="croppedOut_<%= index %>"
                       alt="no image" style="height: 90px; width: 90px;">
-                    <button class="btn btn-primary crop-image" data-index="<%= index %>">Crop</button>
                     <a href="/admin/delete-image/<%= product._id %>/<%= image %>" class="btn btn-danger delete-image" >Delete</a>
                   </div>
                   <% }) %>
@@ -168,53 +172,83 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.js"></script>
 
       <script>
-
-
-        // const image = document.getElementById('cropImage')
-        // const cropper = new Cropper(image, {
-        //   aspectRatio: 0,
-        //   viewMode: 0,
-        // })
-
-        // document.getElementById('cropImageBtn').addEventListener('click', function () {
-        //   var croppedImage = cropper.getCroppedCanvas().toDataURL('image/png')
-
-        //   alert(croppedImage)
-
-        //   document.getElementById('croppedOut').src = C
-
-        // })
-
-
-        document.addEventListener('DOMContentLoaded', function () {
-          const imageContainers = document.querySelectorAll('.image-container');
-          imageContainers.forEach(function (container) {
-            const image = container.querySelector('img');
-            const cropBtn = container.querySelector('.crop-image');
-
-            // Initialize Cropper.js
-            const cropper = new Cropper(image, {
-              aspectRatio: 0, // Set desired aspect ratio for cropping
-              viewMode: 0, // Set view mode to restrict the crop box to the container size
-            });
-
-            cropBtn.addEventListener('click', function () {
-              // Display the cropped image
-              const croppedImage = cropper.getCroppedCanvas();
-              const index = this.dataset.index;
-              const croppedOutImage = document.getElementById(`croppedOut_${index}`);
-              croppedOutImage.src = croppedImage.toDataURL();
-
-              // Perform necessary operations with the cropped image
-              // ...
-
-              // Clean up the Cropper.js instance
-              cropper.destroy();
-            });
-          });
+        const productForm = document.getElementById('productForm');
+      
+        productForm.addEventListener('submit', function (event) {
+          event.preventDefault();
+          if (validateForm()) {
+            this.submit();
+          }
         });
-
-
+      
+        function validateForm() {
+          const nameInput = document.getElementById('name');
+          const priceInput = document.getElementById('price');
+          const stockInput = document.getElementById('stock');
+          const descriptionInput = document.getElementById('description');
+          const categoryInput = document.getElementById('category');
+          const imageInput = document.getElementById('image');
+      
+          const nameError = document.getElementById('nameError');
+          const priceError = document.getElementById('priceError');
+          const stockError = document.getElementById('stockError');
+          const descriptionError = document.getElementById('descriptionError');
+          const categoryError = document.getElementById('categoryError');
+          const imageError = document.getElementById('imageError');
+      
+          nameError.textContent = '';
+          priceError.textContent = '';
+          stockError.textContent = '';
+          descriptionError.textContent = '';
+          categoryError.textContent = '';
+          imageError.textContent = '';
+      
+          let isValid = true;
+      
+          if (nameInput.value.trim() === '') {
+            nameError.textContent = 'Product Name is required';
+            isValid = false;
+          }
+      
+          if (priceInput.value === '' || priceInput.value <= 0) {
+            priceError.textContent = 'Price must be a positive value';
+            isValid = false;
+          }
+      
+          if (stockInput.value === '' || stockInput.value < 0) {
+            stockError.textContent = 'Stock must be a non-negative value';
+            isValid = false;
+          }
+      
+          if (descriptionInput.value.trim() === '') {
+            descriptionError.textContent = 'Description is required';
+            isValid = false;
+          }
+      
+          if (categoryInput.value === '') {
+            categoryError.textContent = 'Category is required';
+            isValid = false;
+          }
+      
+          // Validation for image input
+          if (imageInput.files.length === 0) {
+            imageError.textContent = 'Product Image is required';
+            isValid = false;
+          } else {
+            // Check if the selected files are valid images (optional)
+            const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+            for (let i = 0; i < imageInput.files.length; i++) {
+              const fileExtension = imageInput.files[i].name.split('.').pop().toLowerCase();
+              if (!allowedExtensions.includes('.' + fileExtension)) {
+                imageError.textContent = 'Invalid file type. Only JPG, JPEG, PNG, and WEBP images are allowed.';
+                isValid = false;
+                break;
+              }
+            }
+          }
+      
+          return isValid;
+        }
       </script>
 
       <%- include("../admin/layouts/adminFooter.ejs") %>
