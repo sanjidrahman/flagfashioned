@@ -186,21 +186,18 @@
           const priceInput = document.getElementById('price');
           const stockInput = document.getElementById('stock');
           const descriptionInput = document.getElementById('description');
-          const categoryInput = document.getElementById('category');
           const imageInput = document.getElementById('image');
       
           const nameError = document.getElementById('nameError');
           const priceError = document.getElementById('priceError');
           const stockError = document.getElementById('stockError');
           const descriptionError = document.getElementById('descriptionError');
-          const categoryError = document.getElementById('categoryError');
           const imageError = document.getElementById('imageError');
       
           nameError.textContent = '';
           priceError.textContent = '';
           stockError.textContent = '';
           descriptionError.textContent = '';
-          categoryError.textContent = '';
           imageError.textContent = '';
       
           let isValid = true;
@@ -225,15 +222,9 @@
             isValid = false;
           }
       
-          if (categoryInput.value === '') {
-            categoryError.textContent = 'Category is required';
-            isValid = false;
-          }
-      
           // Validation for image input
           if (imageInput.files.length === 0) {
-            imageError.textContent = 'Product Image is required';
-            isValid = false;
+            isValid = true;
           } else {
             // Check if the selected files are valid images (optional)
             const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
