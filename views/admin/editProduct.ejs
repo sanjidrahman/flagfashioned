@@ -223,9 +223,7 @@
           }
       
           // Validation for image input
-          if (imageInput.files.length === 0) {
-            isValid = true;
-          } else {
+          if (imageInput.files.length !== 0) {
             // Check if the selected files are valid images (optional)
             const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
             for (let i = 0; i < imageInput.files.length; i++) {
