@@ -148,13 +148,13 @@ const placeOrder = async (req, res, next) => {
         const total = req.body.total
         const grand = req.body.grand
         const payment = req.body.payment
-        const checkstat = req.body.checkstat
+        // const checkstat = req.body.checkstat
 
         let status = payment == 'cod' ? 'placed' : 'pending'
 
-        if(checkstat == true) {
-            status = payment + 'wallet'
-        }
+        // if(checkstat == true) {
+        //     status = payment + 'wallet'
+        // }
 
         userId = req.session.user_id
         const user = await User.findOne({ _id: userId })

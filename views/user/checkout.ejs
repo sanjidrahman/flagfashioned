@@ -409,13 +409,13 @@
 
         function placeOrder() {
 
-            const checkbox = document.getElementById('checkbox')
-            let checkstat
-            if(checkbox.checked) {
-                checkstat = true
-            }else{
-                checkstat = false
-            }
+            // const checkbox = document.getElementById('checkbox')
+            // let checkstat
+            // if(checkbox.checked) {
+            //     checkstat = true
+            // }else{
+            //     checkstat = false
+            // }
             const address = document.querySelector('input[name = "selectedAddress"]:checked').value
             const payment = document.querySelector('input[name = "payment"]:checked').value
             const total = document.getElementById('total').value
@@ -437,7 +437,6 @@
                     total: total,
                     code,
                     grand,
-                    checkstat
                 },
                 success: (response) => {
                     if (response.success) {
